@@ -1,5 +1,8 @@
 #![no_std]
 
+
+pub mod command;
+
 #[cfg(test)]
 mod tests {
     #[test]

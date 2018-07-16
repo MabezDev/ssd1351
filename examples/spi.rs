@@ -65,8 +65,6 @@ fn main() -> ! {
     nss.set_low();
     let data = [0x3C];
     spi.write(&data).unwrap();
-    spi.write(&data).unwrap();
-    spi.write(&data).unwrap();
     nss.set_high();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
