@@ -1,3 +1,66 @@
-/* 
-    TODO: This should create an instance of the ssd1351 for the user to interact with
- */
+//! Interface factory
+
+use hal;
+use hal::digital::OutputPin;
+
+use super::display::DisplayRotation;
+use super::display::DisplaySize;
+use super::interface::{SpiInterface};
+// use super::properties::DisplayProperties;
+// use mode::displaymode::DisplayMode;
+// use mode::raw::RawMode;
+
+/// Builder struct. Driver options and interface are set using its methods.
+#[derive(Clone, Copy)]
+pub struct Builder {
+    display_size: DisplaySize,
+    rotation: DisplayRotation,
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl Builder {
+    /// Create new builder with a default size of 128 x 128 pixels and no rotation.
+    pub fn new() -> Self {
+        Self {
+            display_size: DisplaySize::Display128x128,
+            rotation: DisplayRotation::Rotate0
+        }
+    }
+
+    /// Set the size of the display. Supported sizes are defined by [DisplaySize].
+    pub fn with_size(&self, display_size: DisplaySize) -> Self {
+        Self {
+            display_size,
+            ..*self
+        }
+    }
+
+    /// Set the rotation of the display to one of four values. Defaults to no rotation. Note that
+    /// 90º and 270º rotations are not supported by
+    /// [`TerminalMode`](../mode/terminal/struct.TerminalMode.html).
+    pub fn with_rotation(&self, rotation: DisplayRotation) -> Self {
+        Self { rotation, ..*self }
+    }
+
+    //TODO: impl this, including mode
+    // Finish the builder and use SPI to communicate with the display
+    // pub fn connect_spi<SPI, DC>(
+    //     &self,
+    //     spi: SPI,
+    //     dc: DC,
+    // ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    // where
+    //     SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+    //     DC: OutputPin,
+    // {
+    //     let properties =
+    //         DisplayProperties::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+    //     DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+    // }
+
+}
