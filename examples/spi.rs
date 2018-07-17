@@ -10,6 +10,7 @@ extern crate cortex_m;
 extern crate panic_semihosting;
 extern crate embedded_hal as ehal;
 extern crate stm32l432xx_hal as hal;
+extern crate ssd1351;
 
 use cortex_m::asm;
 use hal::prelude::*;
@@ -17,6 +18,7 @@ use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
 use ehal::spi::{FullDuplex, Mode, Phase, Polarity};
+use ssd1351::builder::Builder;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -43,15 +45,11 @@ fn main() -> ! {
         .pb0
         .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
-    // The `L3gd20` abstraction exposed by the `f3` crate requires a specific pin configuration to
-    // be used and won't accept any configuration other than the one used here. Trying to use a
-    // different pin configuration will result in a compiler error.
     let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
 
-    nss.set_high();
-
+    // nss.set_high();
     let mut spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
@@ -62,10 +60,10 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    nss.set_low();
-    let data = [0x3C];
-    spi.write(&data).unwrap();
-    nss.set_high();
+    nss.set_low(); // only one device, always select
+    
+    // TODO
+    // let display = Builder::new();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
