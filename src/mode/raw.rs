@@ -14,7 +14,8 @@ pub struct RawMode<DI>
 where
     DI: DisplayInterface,
 {
-    properties: Display<DI>,
+    // TODO remove pub! - testing only!
+    pub display: Display<DI>,
 }
 
 impl<DI> DisplayModeTrait<DI> for RawMode<DI>
@@ -22,19 +23,19 @@ where
     DI: DisplayInterface,
 {
     /// Create new RawMode instance
-    fn new(properties: Display<DI>) -> Self {
-        RawMode { properties }
+    fn new(display: Display<DI>) -> Self {
+        RawMode { display }
     }
 
     /// Release all resources used by RawMode
     fn release(self) -> Display<DI> {
-        self.properties
+        self.display
     }
 }
 
 impl<DI: DisplayInterface> RawMode<DI> {
     /// Create a new raw display mode
-    pub fn new(properties: Display<DI>) -> Self {
-        RawMode { properties }
+    pub fn new(display: Display<DI>) -> Self {
+        RawMode { display }
     }
 }

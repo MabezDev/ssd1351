@@ -19,6 +19,7 @@ use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
 use ehal::spi::{FullDuplex, Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
+use ssd1351::mode::RawMode;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -53,8 +54,7 @@ fn main() -> ! {
     let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
 
-    // nss.set_high();
-    let mut spi = Spi::spi1(
+    let spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
         MODE,
@@ -67,7 +67,8 @@ fn main() -> ! {
     nss.set_low(); // only one device, always select
     
     // TODO
-    let display = Builder::new().connect_spi(spi, dc);
+    let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
+    display.display.init_column_mode();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings

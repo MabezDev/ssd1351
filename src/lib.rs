@@ -5,9 +5,9 @@ extern crate embedded_hal as hal;
 pub mod command;
 pub mod interface;
 pub mod builder;
-mod display;
-mod properties;
-mod mode;
+pub mod mode;
+pub mod display;
+pub mod properties;
 
 #[cfg(test)]
 mod tests {
