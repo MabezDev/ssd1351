@@ -6,6 +6,8 @@ pub mod command;
 pub mod interface;
 pub mod builder;
 mod display;
+mod properties;
+mod mode;
 
 #[cfg(test)]
 mod tests {

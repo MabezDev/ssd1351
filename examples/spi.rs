@@ -45,6 +45,10 @@ fn main() -> ! {
         .pb0
         .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
+    let mut dc = gpiob
+        .pb7
+        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
+
     let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
@@ -63,7 +67,7 @@ fn main() -> ! {
     nss.set_low(); // only one device, always select
     
     // TODO
-    // let display = Builder::new();
+    let display = Builder::new().connect_spi(spi, dc);
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
