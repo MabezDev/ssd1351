@@ -40,12 +40,12 @@ where
         let display_rotation = self.display_rotation;
 
         // TODO
-        // Command::DisplayOn(false).send(&mut self.iface)?;
-        // Command::DisplayClockDiv(0x8, 0x0).send(&mut self.iface)?;
-        // Command::Multiplex(display_height - 1).send(&mut self.iface)?;
-        // Command::DisplayOffset(0).send(&mut self.iface)?;
-        // Command::StartLine(0).send(&mut self.iface)?;
-        // // TODO: Ability to turn charge pump on/off
+        Command::DisplayOn(false).send(&mut self.iface)?;
+        Command::ClockDiv(0xF1).send(&mut self.iface)?;
+        Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
+        Command::DisplayOffset(0).send(&mut self.iface)?;
+        Command::StartLine(0).send(&mut self.iface)?;
+        // TODO: Ability to turn charge pump on/off
         // Command::ChargePump(true).send(&mut self.iface)?;
         // Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
 
@@ -57,13 +57,23 @@ where
         //     DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
         // }?;
 
-        // Command::Contrast(0x8F).send(&mut self.iface)?;
-        // Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        // Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
-        // Command::AllOn(false).send(&mut self.iface)?;
-        // Command::Invert(false).send(&mut self.iface)?;
-        // Command::EnableScroll(false).send(&mut self.iface)?;
-        // Command::DisplayOn(true).send(&mut self.iface)?;
+        
+        /* Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
+        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
+        Command::AllOn(false).send(&mut self.iface)?;
+        Command::Invert(false).send(&mut self.iface)?;
+        Command::EnableScroll(false).send(&mut self.iface)?; */
+        
+        Command::SetGpio(0x00).send(&mut self.iface)?;
+        Command::FunctionSelect(0x01).send(&mut self.iface)?;
+        Command::PreCharge(0x32).send(&mut self.iface)?;
+        Command::Vcomh(0x05).send(&mut self.iface)?;
+        Command::NormalDisplay.send(&mut self.iface)?;
+        Command::ContrastMaster(0x0F).send(&mut self.iface)?;
+        Command::Contrast(0x8F).send(&mut self.iface)?;
+        Command::SetVsl.send(&mut self.iface)?;
+        Command::PreCharge2(0x01).send(&mut self.iface)?;
+        Command::DisplayOn(true).send(&mut self.iface)?;
 
         Ok(())
     }
@@ -73,8 +83,8 @@ where
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
         // TODO
-        // Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
-        // Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Command::Column(start.0, end.0 - 1).send(&mut self.iface)?;
+        Command::Row(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
         Ok(())
     }
 

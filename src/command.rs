@@ -28,15 +28,15 @@ pub enum Command {
     /// Vcomh
     Vcomh(u8),
     /// NormalDisplayOn
-    NormalDisplayOn(bool),
+    NormalDisplay,
     /// Contrast
-    Contrast(u8), // TODO actually change contrast
+    Contrast(u8),
     /// ContrastMaster
     ContrastMaster(u8),
     /// SetVsl
-    SetVsl(u8),
+    SetVsl,
     /// SetPrecharge
-    SetPrecharge(u8),
+    PreCharge2(u8),
 }
 
 impl Command {
@@ -46,13 +46,30 @@ impl Command {
         DI: DisplayInterface,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
-        // let (data, len) = match self {
-        //     Command::WriteToRam => {}
-        // };
+        let (data, len) = match self {
+            Command::CommandLock(val) => ([0xFD, val, 0,0,0,0,0], 2),
+            Command::DisplayOn(val) => ([if val { 0xAF } else { 0xAE }, 0,0,0,0,0,0], 1),
+            Command::ClockDiv(val) => ([0xB3, val as u8, 0,0,0,0,0], 2),
+            Command::MuxRatio(val) => ([0xCA, val as u8, 0,0,0,0,0], 2),
+            Command::SetRemap(val) => ([0xA0, val as u8, 0,0,0,0,0], 2),
+            Command::Column(start, end) => ([0x15, start as u8, end as u8,0,0,0,0], 3),
+            Command::Row(start, end) => ([0x75, start as u8, end as u8,0,0,0,0], 3),
+            Command::StartLine(val) => ([0xA1, val as u8,0,0,0,0,0], 2),
+            Command::DisplayOffset(val) => ([0xA2, val as u8,0,0,0,0,0], 2),
+            Command::SetGpio(val) => ([0xB5, val as u8,0,0,0,0,0], 2),
+            Command::FunctionSelect(val) => ([0xAB, val as u8,0,0,0,0,0], 2),
+            Command::PreCharge(val) => ([0xB6, val as u8,0,0,0,0,0], 2),
+            Command::Vcomh(val) => ([0xBE, val as u8,0,0,0,0,0], 2),
+            Command::NormalDisplay => ([0xA6, 0,0,0,0,0,0], 2), // alternative?
+            Command::Contrast(_) => ([0xC1, 0xC8,0x80,0xC8,0,0,0], 4), // TODO actually change contrast
+            Command::ContrastMaster(_) => ([0xC7, 0x0F,0,0,0,0,0], 2), //TODO change on val?
+            Command::SetVsl => ([0xB4, 0xA0,0xB5,0x55,0,0,0], 4),
+            Command::PreCharge2(val) => ([0xB6, val as u8,0,0,0,0,0], 2), //TODO change on val?
+        };
         
 
         // Send command over the interface
-        // iface.send_commands(&data[0..len])?;
+        iface.send_commands(&data[0..len])?;
 
         Ok(())
     }

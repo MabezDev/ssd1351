@@ -70,6 +70,10 @@ fn main() -> ! {
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.display.init();
 
+    let colour = 0xFFFFFF_FFFFFF;
+    let buffer = [0xFFFFFF, 0xFFFFFF];
+    display.display.draw(&buffer);
+
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
     asm::bkpt();
