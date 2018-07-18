@@ -2,9 +2,41 @@ use super::interface::DisplayInterface;
 
 pub enum Command {
     /// Column address
-    ColumnAddress(u8,u8),
+    Column(u8,u8),
     /// Row address
-    RowAddress(u8,u8)
+    Row(u8,u8),
+    /// CommandLock
+    CommandLock(u8),
+    /// DisplayOn
+    DisplayOn(bool),
+    /// ClockDiv
+    ClockDiv(u8),
+    /// MuxRatio
+    MuxRatio(u8),
+    /// SetRemap
+    SetRemap(bool),
+    /// Display Start Row
+    StartLine(u8),
+    /// DisplayOffset
+    DisplayOffset(u8),
+    /// SetGpio
+    SetGpio(u8),
+    /// FunctionSelect
+    FunctionSelect(u8),
+    /// PreCharge
+    PreCharge(u8),
+    /// Vcomh
+    Vcomh(u8),
+    /// NormalDisplayOn
+    NormalDisplayOn(bool),
+    /// Contrast
+    Contrast(u8), // TODO actually change contrast
+    /// ContrastMaster
+    ContrastMaster(u8),
+    /// SetVsl
+    SetVsl(u8),
+    /// SetPrecharge
+    SetPrecharge(u8),
 }
 
 impl Command {
@@ -14,6 +46,19 @@ impl Command {
         DI: DisplayInterface,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
+        // let (data, len) = match self {
+        //     Command::WriteToRam => {}
+        // };
+        
+
+        // Send command over the interface
+        // iface.send_commands(&data[0..len])?;
+
+        Ok(())
+    }
+}
+
+// Transform command into a fixed size array of 7 u8 and the real length for sending
         // let (data, len) = match self {
         //     Command::Contrast(val) => ([0x81, val, 0, 0, 0, 0, 0], 2),
         //     Command::AllOn(on) => ([0xA4 | (on as u8), 0, 0, 0, 0, 0, 0], 1),
@@ -79,10 +124,3 @@ impl Command {
         //     Command::Noop => ([0xE3, 0, 0, 0, 0, 0, 0], 1),
         //     Command::ChargePump(en) => ([0x8D, 0x10 | ((en as u8) << 2), 0, 0, 0, 0, 0], 2),
         // };
-
-        // Send command over the interface
-        // iface.send_commands(&data[0..len])?;
-
-        Ok(())
-    }
-}

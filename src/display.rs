@@ -33,7 +33,7 @@ where
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init_column_mode(&mut self) -> Result<(), ()> {
+    pub fn init(&mut self) -> Result<(), ()> {
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (display_width, display_height) = self.display_size.dimensions();
 
@@ -72,8 +72,8 @@ where
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
-        Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
         // TODO
+        // Command::ColumnAddress(start.0, end.0 - 1).send(&mut self.iface)?;
         // Command::PageAddress(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
         Ok(())
     }

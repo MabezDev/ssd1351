@@ -68,7 +68,7 @@ fn main() -> ! {
     
     // TODO
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.display.init_column_mode();
+    display.display.init();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
