@@ -54,6 +54,7 @@ fn main() -> ! {
     let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
 
+    // TODO BIDIOE register to enable transmit only! - currently the spi bus is stuck waiting for rxne bit chich wont come as our device is recieve only!
     let spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
@@ -72,7 +73,7 @@ fn main() -> ! {
 
     let colour = 0xFFFFFF_FFFFFF;
     let buffer = [0xFFFFFF, 0xFFFFFF];
-    display.display.draw(&buffer);
+    display.display.draw(&buffer).unwrap();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
