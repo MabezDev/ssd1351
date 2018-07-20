@@ -14,7 +14,7 @@ pub enum Command {
     /// MuxRatio
     MuxRatio(u8),
     /// SetRemap
-    SetRemap(bool),
+    SetRemap(u8),
     /// Display Start Row
     StartLine(u8),
     /// DisplayOffset
@@ -28,7 +28,7 @@ pub enum Command {
     /// Vcomh
     Vcomh(u8),
     /// NormalDisplayOn
-    NormalDisplay,
+    Invert(bool),
     /// Contrast
     Contrast(u8),
     /// ContrastMaster
@@ -60,7 +60,7 @@ impl Command {
             Command::FunctionSelect(val) => ([0xAB, val as u8,0,0,0,0,0], 2),
             Command::PreCharge(val) => ([0xB6, val as u8,0,0,0,0,0], 2),
             Command::Vcomh(val) => ([0xBE, val as u8,0,0,0,0,0], 2),
-            Command::NormalDisplay => ([0xA6, 0,0,0,0,0,0], 2), // alternative?
+            Command::Invert(val) => ([if val { 0xA7 } else { 0xA6 }, 0,0,0,0,0,0], 2), // alternative?
             Command::Contrast(_) => ([0xC1, 0xC8,0x80,0xC8,0,0,0], 4), // TODO actually change contrast
             Command::ContrastMaster(_) => ([0xC7, 0x0F,0,0,0,0,0], 2), //TODO change on val?
             Command::SetVsl => ([0xB4, 0xA0,0xB5,0x55,0,0,0], 4),

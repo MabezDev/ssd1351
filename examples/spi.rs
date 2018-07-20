@@ -20,6 +20,7 @@ use rt::ExceptionFrame;
 use ehal::spi::{FullDuplex, Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::RawMode;
+use hal::delay::Delay;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -42,9 +43,12 @@ fn main() -> ! {
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb2);
 
-    // let mut nss = gpiob
-    //     .pb0
-    //     .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
+    let cp = cortex_m::Peripherals::take().unwrap();
+    let mut delay = Delay::new(cp.SYST, clocks);
+
+    let mut rst = gpioa
+        .pa8
+        .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
 
     let mut dc = gpiob
         .pb1
@@ -80,18 +84,28 @@ fn main() -> ! {
     // );
 
     // nss.set_low(); // only one device, always select
+
+    // reset the display
+    rst.set_high();
+    delay.delay_ms(500_u16);
+    rst.set_low();
+    delay.delay_ms(500_u16);
+    rst.set_high();
+    delay.delay_ms(500_u16);
     
     // TODO
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.display.init();
 
-    let colour = 0x3658;
+    let colour = 0xFFFF; // white
     let buffer = [(colour >> 8) as u8, colour as u8];
     let dimensions = display.display.get_size();
-    for i in 0..128 {
-        display.display.set_draw_area((i, i),(128, 128)).unwrap();
-        display.display.draw(&buffer).unwrap();
-    }
+    let i = 0;
+    // display.display.set_draw_area((i, i),(128, 128)).unwrap();
+    display.display.draw(&buffer).unwrap();
+    // for i in 0..128 {
+        
+    // }
     
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the

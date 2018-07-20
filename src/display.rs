@@ -39,12 +39,27 @@ where
 
         let display_rotation = self.display_rotation;
 
-        // TODO
+        Command::CommandLock(0x12).send(&mut self.iface)?;
+        Command::CommandLock(0xB1).send(&mut self.iface)?;
         Command::DisplayOn(false).send(&mut self.iface)?;
         Command::ClockDiv(0xF1).send(&mut self.iface)?;
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
-        Command::DisplayOffset(0).send(&mut self.iface)?;
+        Command::SetRemap(0x74).send(&mut self.iface)?;
+        self.set_draw_area((0, 0), (display_width, display_height))?;
         Command::StartLine(0).send(&mut self.iface)?;
+        Command::DisplayOffset(0).send(&mut self.iface)?;
+        Command::SetGpio(0x00).send(&mut self.iface)?;
+        Command::FunctionSelect(0x01).send(&mut self.iface)?;
+        Command::PreCharge(0x32).send(&mut self.iface)?;
+        Command::Vcomh(0x05).send(&mut self.iface)?;
+        Command::Invert(false).send(&mut self.iface)?;
+        Command::ContrastMaster(0x0F).send(&mut self.iface)?;
+        Command::Contrast(0x8F).send(&mut self.iface)?;
+        Command::SetVsl.send(&mut self.iface)?;
+        Command::PreCharge2(0x01).send(&mut self.iface)?;
+        Command::DisplayOn(true).send(&mut self.iface)?;
+
+
         // TODO: Ability to turn charge pump on/off
         // Command::ChargePump(true).send(&mut self.iface)?;
         // Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
@@ -63,17 +78,6 @@ where
         Command::AllOn(false).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
         Command::EnableScroll(false).send(&mut self.iface)?; */
-        
-        Command::SetGpio(0x00).send(&mut self.iface)?;
-        Command::FunctionSelect(0x01).send(&mut self.iface)?;
-        Command::PreCharge(0x32).send(&mut self.iface)?;
-        Command::Vcomh(0x05).send(&mut self.iface)?;
-        Command::NormalDisplay.send(&mut self.iface)?;
-        Command::ContrastMaster(0x0F).send(&mut self.iface)?;
-        Command::Contrast(0x8F).send(&mut self.iface)?;
-        Command::SetVsl.send(&mut self.iface)?;
-        Command::PreCharge2(0x01).send(&mut self.iface)?;
-        Command::DisplayOn(true).send(&mut self.iface)?;
 
         Ok(())
     }
