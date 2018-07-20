@@ -87,7 +87,12 @@ fn main() -> ! {
 
     let colour = 0x3658;
     let buffer = [(colour >> 8) as u8, colour as u8];
-    display.display.draw(&buffer).unwrap();
+    let dimensions = display.display.get_size();
+    for i in 0..128 {
+        display.display.set_draw_area((i, i),(128, 128)).unwrap();
+        display.display.draw(&buffer).unwrap();
+    }
+    
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
     // gyroscope and the temperature sensor readings
