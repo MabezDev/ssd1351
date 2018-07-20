@@ -23,8 +23,8 @@ use ssd1351::mode::RawMode;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
-    phase: Phase::CaptureOnSecondTransition,
-    polarity: Polarity::IdleHigh,
+    phase: Phase::CaptureOnFirstTransition,
+    polarity: Polarity::IdleLow,
 };
 
 entry!(main);
@@ -42,19 +42,18 @@ fn main() -> ! {
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb2);
 
-    let mut nss = gpiob
-        .pb0
-        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
+    // let mut nss = gpiob
+    //     .pb0
+    //     .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
     let mut dc = gpiob
-        .pb7
+        .pb1
         .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
     let sck = gpioa.pa5.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let miso = gpioa.pa6.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
     let mosi = gpioa.pa7.into_af5(&mut gpioa.moder, &mut gpioa.afrl);
 
-    // TODO BIDIOE register to enable transmit only! - currently the spi bus is stuck waiting for rxne bit chich wont come as our device is recieve only!
     let spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
@@ -65,14 +64,29 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    nss.set_low(); // only one device, always select
+
+    // let sck = gpiob.pb3.into_af5(&mut gpiob.moder, &mut gpiob.afrl);
+    // let miso = gpiob.pb4.into_af5(&mut gpiob.moder, &mut gpiob.afrl);
+    // let mosi = gpiob.pb5.into_af5(&mut gpiob.moder, &mut gpiob.afrl);
+
+    // let spi = Spi::spi3(
+    //     p.SPI3,
+    //     (sck, miso, mosi),
+    //     MODE,
+    //     // 1.mhz(),
+    //     100.khz(),
+    //     clocks,
+    //     &mut rcc.apb1r1,
+    // );
+
+    // nss.set_low(); // only one device, always select
     
     // TODO
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.display.init();
 
-    let colour = 0xFFFFFF_FFFFFF;
-    let buffer = [0xFFFFFF, 0xFFFFFF];
+    let colour = 0x3658;
+    let buffer = [(colour >> 8) as u8, colour as u8];
     display.display.draw(&buffer).unwrap();
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
