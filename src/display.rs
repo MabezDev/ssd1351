@@ -66,7 +66,8 @@ where
         let colour = 0x0000;
         let buffer = [(colour >> 8) as u8, colour as u8];
         for _ in 0..(display_width as u32 * display_height as u32) {
-            self.draw(&buffer)?;
+            // self.draw(&buffer)?;
+            self.iface.send_data(&buffer)?;
         }
         
 
