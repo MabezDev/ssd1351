@@ -9,6 +9,8 @@ pub enum Command {
     CommandLock(u8),
     /// DisplayOn
     DisplayOn(bool),
+    /// WriteRam
+    WriteRam,
     /// ClockDiv
     ClockDiv(u8),
     /// MuxRatio
@@ -32,11 +34,12 @@ pub enum Command {
     /// Contrast
     Contrast(u8),
     /// ContrastMaster
-    ContrastMaster(u8),
+    ContrastCurrent(u8),
     /// SetVsl
     SetVsl,
     /// SetPrecharge
     PreCharge2(u8),
+    PhaseLength(u8)
 }
 
 impl Command {
@@ -58,13 +61,15 @@ impl Command {
             Command::DisplayOffset(val) => ([0xA2, val as u8,0,0,0,0,0], 2),
             Command::SetGpio(val) => ([0xB5, val as u8,0,0,0,0,0], 2),
             Command::FunctionSelect(val) => ([0xAB, val as u8,0,0,0,0,0], 2),
-            Command::PreCharge(val) => ([0xB6, val as u8,0,0,0,0,0], 2),
+            Command::PreCharge(val) => ([0xBB, val as u8,0,0,0,0,0], 2),
+            Command::PhaseLength(val) => ([0xB1, val as u8,0,0,0,0,0], 2),
             Command::Vcomh(val) => ([0xBE, val as u8,0,0,0,0,0], 2),
-            Command::Invert(val) => ([if val { 0xA7 } else { 0xA6 }, 0,0,0,0,0,0], 2), // alternative?
+            Command::Invert(val) => ([if val { 0xA7 } else { 0xA6 }, 0,0,0,0,0,0], 1),
             Command::Contrast(_) => ([0xC1, 0xC8,0x80,0xC8,0,0,0], 4), // TODO actually change contrast
-            Command::ContrastMaster(_) => ([0xC7, 0x0F,0,0,0,0,0], 2), //TODO change on val?
+            Command::ContrastCurrent(val) => ([0xC7, val as u8,0,0,0,0,0], 2), //TODO change on val?
             Command::SetVsl => ([0xB4, 0xA0,0xB5,0x55,0,0,0], 4),
             Command::PreCharge2(val) => ([0xB6, val as u8,0,0,0,0,0], 2), //TODO change on val?
+            Command::WriteRam => ([0x5C, 0,0,0,0,0,0], 1),
         };
         
 

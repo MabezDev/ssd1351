@@ -44,19 +44,32 @@ where
         Command::DisplayOn(false).send(&mut self.iface)?;
         Command::ClockDiv(0xF1).send(&mut self.iface)?;
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
-        Command::SetRemap(0x74).send(&mut self.iface)?;
-        self.set_draw_area((0, 0), (display_width, display_height))?;
-        Command::StartLine(0).send(&mut self.iface)?;
+        // self.set_draw_area((0, 0), (display_width, display_height))?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
+        Command::StartLine(0).send(&mut self.iface)?;
+        Command::SetRemap(0xB4).send(&mut self.iface)?;
+        // Command::SetRemap(0x74).send(&mut self.iface)?;
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
-        Command::PreCharge(0x32).send(&mut self.iface)?;
+        Command::SetVsl.send(&mut self.iface)?;
+        Command::Contrast(0x8F).send(&mut self.iface)?;
+        Command::ContrastCurrent(0x0F).send(&mut self.iface)?;
+        Command::PhaseLength(0x32).send(&mut self.iface)?;
+        Command::PreCharge(0x17).send(&mut self.iface)?;
+        Command::PreCharge2(0x01).send(&mut self.iface)?;
         Command::Vcomh(0x05).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
-        Command::ContrastMaster(0x0F).send(&mut self.iface)?;
-        Command::Contrast(0x8F).send(&mut self.iface)?;
-        Command::SetVsl.send(&mut self.iface)?;
-        Command::PreCharge2(0x01).send(&mut self.iface)?;
+
+        // clear screen - todo use hw accleration
+        self.set_draw_area((0,0), (128, 128))?;
+        // Command::WriteRam.send(&mut self.iface)?;
+        let colour = 0x0000;
+        let buffer = [(colour >> 8) as u8, colour as u8];
+        for _ in 0..(display_width as u32 * display_height as u32) {
+            self.draw(&buffer)?;
+        }
+        
+
         Command::DisplayOn(true).send(&mut self.iface)?;
 
 
@@ -88,6 +101,7 @@ where
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
         Command::Column(start.0, end.0 - 1).send(&mut self.iface)?;
         Command::Row(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Command::WriteRam.send(&mut self.iface)?;
         Ok(())
     }
 

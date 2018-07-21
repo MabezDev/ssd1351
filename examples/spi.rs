@@ -62,8 +62,8 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        // 1.mhz(),
-        100.khz(),
+        10.mhz(),
+        // 100.khz(),
         clocks,
         &mut rcc.apb2,
     );
@@ -87,21 +87,21 @@ fn main() -> ! {
 
     // reset the display
     rst.set_high();
-    delay.delay_ms(500_u16);
+    delay.delay_ms(5_u16);
     rst.set_low();
-    delay.delay_ms(500_u16);
+    delay.delay_ms(10_u16);
     rst.set_high();
-    delay.delay_ms(500_u16);
+    delay.delay_ms(5_u16);
     
     // TODO
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.display.init();
+    display.display.init().unwrap();
 
-    let colour = 0xFFFF; // white
+    let colour = 0xD90C; // 16 bit colour of choice
     let buffer = [(colour >> 8) as u8, colour as u8];
     let dimensions = display.display.get_size();
-    let i = 0;
-    // display.display.set_draw_area((i, i),(128, 128)).unwrap();
+    let i = 4;
+    display.display.set_draw_area((i, i+1),(i, i+1)).unwrap();
     display.display.draw(&buffer).unwrap();
     // for i in 0..128 {
         
