@@ -1,9 +1,13 @@
 [package]
 name = "ssd1351"
 version = "0.1.0"
-authors = ["Scott <MabezDev@gmail.com>"]
+authors = ["Scott Mabin <mabez123@gmail.com>"]
 
 [dependencies]
+
+[dependencies.embedded-graphics]
+version = "0.1.1"
+optional = true
 
 [dependencies.embedded-hal]
 version = "0.2.1"
@@ -33,3 +37,7 @@ codegen-units = 1
 codegen-units = 1
 debug = true
 lto = true
+
+[features]
+default = ["graphics"]
+graphics = ["embedded-graphics"]
