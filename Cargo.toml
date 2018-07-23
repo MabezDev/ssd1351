@@ -15,7 +15,7 @@ features = ["stm32l4x2", "rt"]
 
 [dev-dependencies.stm32l432xx-hal]
 git = "https://github.com/MabezDev/stm32l432xx-hal"
-branch = "pll"
+# branch = "pll"
 # path = "../../hal/stm32l432xx-hal"
 
 [dev-dependencies]
