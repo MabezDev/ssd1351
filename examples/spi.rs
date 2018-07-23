@@ -63,7 +63,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        24.mhz(),
+        1.mhz(),
         // 100.khz(),
         clocks,
         &mut rcc.apb2,
@@ -103,12 +103,9 @@ fn main() -> ! {
     let dimensions = display.display.get_size();
     let i = 8;
     display.display.set_draw_area((i, i+1),(i, i+1)).unwrap();
-    for _ in 0..128 {
+    for _ in 0..128 { // draw a line
         display.display.draw(&buffer).unwrap();
-    }   
-    // for i in 0..128 {
-        
-    // }
+    }
     
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the

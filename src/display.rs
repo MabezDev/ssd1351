@@ -34,11 +34,9 @@ where
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
     pub fn init(&mut self) -> Result<(), ()> {
+        let (_, display_height) = self.display_size.dimensions();
+
         // TODO: Break up into nice bits so display modes can pick whathever they need
-        let (display_width, display_height) = self.display_size.dimensions();
-
-        // let display_rotation = self.display_rotation;
-
         Command::CommandLock(0x12).send(&mut self.iface)?;
         Command::CommandLock(0xB1).send(&mut self.iface)?;
         Command::DisplayOn(false).send(&mut self.iface)?;
@@ -58,16 +56,20 @@ where
         Command::Vcomh(0x05).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
 
-        // clear screen - set to black
-        self.set_draw_area((0,0), (display_width, display_height))?;
-        // for _ in 0..(display_height as u32 * display_width as u32) {
-        //     self.iface.send_data(&[0x00, 0x00])?;
-        // }
-        self.iface.send_data(&[0x00; (128usize * 128usize * 2usize)])?;
+        self.clear()?;
         
-
         Command::DisplayOn(true).send(&mut self.iface)?;
 
+        Ok(())
+    }
+
+    /// Clear the display by setting all pixels to black
+    pub fn clear(&mut self) -> Result<(), ()> {
+        let (display_width, display_height) = self.display_size.dimensions();
+        self.set_draw_area((0,0), (display_width, display_height))?;
+        for _ in 0..(display_height as u32 * display_width as u32) {
+            self.iface.send_data(&[0x00, 0x00])?; // send 8 * 2 bits
+        }
         Ok(())
     }
 
