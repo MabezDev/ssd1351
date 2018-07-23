@@ -66,9 +66,9 @@ impl Command {
             Command::Vcomh(val) => ([0xBE, val as u8,0,0,0,0,0], 2),
             Command::Invert(val) => ([if val { 0xA7 } else { 0xA6 }, 0,0,0,0,0,0], 1),
             Command::Contrast(_) => ([0xC1, 0xC8,0x80,0xC8,0,0,0], 4), // TODO actually change contrast
-            Command::ContrastCurrent(val) => ([0xC7, val as u8,0,0,0,0,0], 2), //TODO change on val?
-            Command::SetVsl => ([0xB4, 0xA0,0xB5,0x55,0,0,0], 4),
-            Command::PreCharge2(val) => ([0xB6, val as u8,0,0,0,0,0], 2), //TODO change on val?
+            Command::ContrastCurrent(val) => ([0xC7, val as u8,0,0,0,0,0], 2),
+            Command::SetVsl => ([0xB4,0xA0,0xB5,0x55, 0,0,0], 4),
+            Command::PreCharge2(val) => ([0xB6, val as u8, 0,0,0,0,0], 2),
             Command::WriteRam => ([0x5C, 0,0,0,0,0,0], 1),
         };
         

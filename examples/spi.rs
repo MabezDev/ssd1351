@@ -37,7 +37,8 @@ fn main() -> ! {
     let mut rcc = p.RCC.constrain();
 
     // TRY the other clock configuration
-    let clocks = rcc.cfgr.freeze(&mut flash.acr);
+    // let clocks = rcc.cfgr.freeze(&mut flash.acr);
+    let clocks = rcc.cfgr.sysclk(80.mhz()).pclk1(80.mhz()).pclk2(80.mhz()).freeze(&mut flash.acr);
     // let clocks = rcc.cfgr.sysclk(64.mhz()).pclk1(32.mhz()).freeze(&mut flash.acr);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
@@ -62,7 +63,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        10.mhz(),
+        24.mhz(),
         // 100.khz(),
         clocks,
         &mut rcc.apb2,
@@ -89,7 +90,7 @@ fn main() -> ! {
     rst.set_high();
     delay.delay_ms(5_u16);
     rst.set_low();
-    delay.delay_ms(10_u16);
+    delay.delay_ms(100_u16);
     rst.set_high();
     delay.delay_ms(5_u16);
     
@@ -100,9 +101,11 @@ fn main() -> ! {
     let colour = 0xD90C; // 16 bit colour of choice
     let buffer = [(colour >> 8) as u8, colour as u8];
     let dimensions = display.display.get_size();
-    let i = 4;
+    let i = 8;
     display.display.set_draw_area((i, i+1),(i, i+1)).unwrap();
-    display.display.draw(&buffer).unwrap();
+    for _ in 0..128 {
+        display.display.draw(&buffer).unwrap();
+    }   
     // for i in 0..128 {
         
     // }

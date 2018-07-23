@@ -37,18 +37,16 @@ where
         // TODO: Break up into nice bits so display modes can pick whathever they need
         let (display_width, display_height) = self.display_size.dimensions();
 
-        let display_rotation = self.display_rotation;
+        // let display_rotation = self.display_rotation;
 
         Command::CommandLock(0x12).send(&mut self.iface)?;
         Command::CommandLock(0xB1).send(&mut self.iface)?;
         Command::DisplayOn(false).send(&mut self.iface)?;
         Command::ClockDiv(0xF1).send(&mut self.iface)?;
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
-        // self.set_draw_area((0, 0), (display_width, display_height))?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
         Command::SetRemap(0xB4).send(&mut self.iface)?;
-        // Command::SetRemap(0x74).send(&mut self.iface)?;
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
         Command::SetVsl.send(&mut self.iface)?;
@@ -60,38 +58,15 @@ where
         Command::Vcomh(0x05).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
 
-        // clear screen - todo use hw accleration
-        self.set_draw_area((0,0), (128, 128))?;
-        // Command::WriteRam.send(&mut self.iface)?;
-        let colour = 0x0000;
-        let buffer = [(colour >> 8) as u8, colour as u8];
-        for _ in 0..(display_width as u32 * display_height as u32) {
-            // self.draw(&buffer)?;
-            self.iface.send_data(&buffer)?;
-        }
+        // clear screen - set to black
+        self.set_draw_area((0,0), (display_width, display_height))?;
+        // for _ in 0..(display_height as u32 * display_width as u32) {
+        //     self.iface.send_data(&[0x00, 0x00])?;
+        // }
+        self.iface.send_data(&[0x00; (128usize * 128usize * 2usize)])?;
         
 
         Command::DisplayOn(true).send(&mut self.iface)?;
-
-
-        // TODO: Ability to turn charge pump on/off
-        // Command::ChargePump(true).send(&mut self.iface)?;
-        // Command::AddressMode(AddrMode::Horizontal).send(&mut self.iface)?;
-
-        // self.set_rotation(display_rotation)?;
-
-        // match self.display_size {
-        //     DisplaySize::Display128x32 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        //     DisplaySize::Display128x64 => Command::ComPinConfig(true, false).send(&mut self.iface),
-        //     DisplaySize::Display96x16 => Command::ComPinConfig(false, false).send(&mut self.iface),
-        // }?;
-
-        
-        /* Command::PreChargePeriod(0x1, 0xF).send(&mut self.iface)?;
-        Command::VcomhDeselect(VcomhLevel::Auto).send(&mut self.iface)?;
-        Command::AllOn(false).send(&mut self.iface)?;
-        Command::Invert(false).send(&mut self.iface)?;
-        Command::EnableScroll(false).send(&mut self.iface)?; */
 
         Ok(())
     }
