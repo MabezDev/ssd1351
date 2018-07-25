@@ -74,15 +74,16 @@ fn main() -> ! {
     );
 
     // reset the display
-    rst.set_high();
-    delay.delay_ms(5_u16);
-    rst.set_low();
-    delay.delay_ms(100_u16);
-    rst.set_high();
-    delay.delay_ms(5_u16);
+    // rst.set_high();
+    // delay.delay_ms(5_u16);
+    // rst.set_low();
+    // delay.delay_ms(100_u16);
+    // rst.set_high();
+    // delay.delay_ms(5_u16);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.init().unwrap();
+    display.reset(&mut rst, &mut delay);
 
     display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
     display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());

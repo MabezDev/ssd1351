@@ -1,5 +1,7 @@
 use interface::DisplayInterface;
 use display::Display;
+use hal::blocking::delay::DelayMs;
+use hal::digital::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
 
@@ -39,32 +41,30 @@ where
 {
     /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
     pub fn clear(&mut self) {
-        self.display.clear();
+        self.display.clear().unwrap();
     }
 
     /// Reset display
-    // TODO: Move to a more appropriate place
-    // pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
-    // where
-    //     RST: OutputPin,
-    //     DELAY: DelayMs<u8>,
-    // {
-    //     rst.set_high();
-    //     delay.delay_ms(1);
-    //     rst.set_low();
-    //     delay.delay_ms(10);
-    //     rst.set_high();
-    // }
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    where
+        RST: OutputPin,
+        DELAY: DelayMs<u8>,
+    {
+        rst.set_high();
+        delay.delay_ms(1);
+        rst.set_low();
+        delay.delay_ms(10);
+        rst.set_high();
+    }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
         let (display_width, display_height) = self.display.get_size().dimensions();
+        //TODO rotation
         // let display_rotation = self.display.get_rotation();
-
-        //TODO
         self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
-        let color = value as u16 * 257;
+        let color = value as u16 * 257; // TODO remove this hack to convert 8bit colours to 16bit when embeddedgraphics supports it
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
 
