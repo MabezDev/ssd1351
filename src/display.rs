@@ -44,7 +44,7 @@ where
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
-        Command::SetRemap(0xB4).send(&mut self.iface)?;
+        // Command::SetRemap(0xB4).send(&mut self.iface)?; // TODO why doies this mess up the display?
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
         Command::SetVsl.send(&mut self.iface)?;

@@ -101,11 +101,14 @@ fn main() -> ! {
     let colour = 0xD90C; // 16 bit colour of choice
     let buffer = [(colour >> 8) as u8, colour as u8];
     let dimensions = display.display.get_size();
-    let i = 8;
-    display.display.set_draw_area((i, i+1),(i, i+1)).unwrap();
-    for _ in 0..128 { // draw a line
-        display.display.draw(&buffer).unwrap();
-    }
+    let mut i = 0;
+    display.display.set_draw_area((0, 0),(128, 128)).unwrap();
+    display.display.draw(&buffer).unwrap();
+    display.display.set_draw_area((64, 64),(128, 128)).unwrap();
+    display.display.draw(&buffer).unwrap();
+    // for _ in 0..128 { // draw a line
+    //     display.display.draw(&buffer).unwrap();
+    // }
     
 
     // when you reach this breakpoint you'll be able to inspect the variable `_m` which contains the
