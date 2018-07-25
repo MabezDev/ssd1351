@@ -24,7 +24,9 @@ use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::fonts::Font6x8;
+// use embedded_graphics::fonts::Font6x8;
+// use embedded_graphics::fonts::Font8x16;
+use embedded_graphics::fonts::Font12x16;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -67,7 +69,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        1.mhz(),
+        24.mhz(),
         // 100.khz(),
         clocks,
         &mut rcc.apb2,
@@ -84,12 +86,21 @@ fn main() -> ! {
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.init().unwrap();
 
-    display.draw(Font6x8::render_str("Hello world!").into_iter());
-    display.draw(
-        Font6x8::render_str("Hello Rust!")
-            .translate((0, 16))
-            .into_iter(),
-    );
+    let mut i = 0;
+    loop {
+        display.draw(Font12x16::render_str("Wavey!", i).into_iter());
+        // display.clear();
+        i+=1;
+        if i == 255 {
+            i = 0;
+        }
+    }
+    
+    // display.draw(
+    //     Font6x8::render_str("Hello Rust!", 0x84)
+    //         .translate((0, 16))
+    //         .into_iter(),
+    // );
     
     asm::bkpt();
 

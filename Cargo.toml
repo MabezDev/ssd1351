@@ -6,7 +6,10 @@ authors = ["Scott Mabin <mabez123@gmail.com>"]
 [dependencies]
 
 [dependencies.embedded-graphics]
-version = "0.1.1"
+# version = "0.1.1"
+# path = "../embedded-graphics/embedded-graphics"
+git = "https://github.com/MabezDev/embedded-graphics"
+branch = "coloured-fonts"
 optional = true
 
 [dependencies.embedded-hal]
