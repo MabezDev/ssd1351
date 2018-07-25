@@ -90,6 +90,7 @@ fn main() -> ! {
     loop {
         display.draw(Font12x16::render_str("Wavey!", i).into_iter());
         // display.clear();
+        delay.delay_ms(32_u16);
         i+=1;
         if i == 255 {
             i = 0;
