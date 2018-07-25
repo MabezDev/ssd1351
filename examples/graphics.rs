@@ -84,8 +84,8 @@ fn main() -> ! {
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.init().unwrap();
 
-    display.draw(Line::new((0, 0), (74, 74), 0x84).into_iter());
-    display.draw(Circle::new((64, 64), 8, 0x24).into_iter());
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());
     
     asm::bkpt();
 
