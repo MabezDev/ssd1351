@@ -84,8 +84,8 @@ fn main() -> ! {
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.init().unwrap();
 
-    display.draw(Line::new((54, 54), (74, 74), 0x84).into_iter());
-    // display.draw(Circle::new((96, 16 + 8), 8, 0x24).into_iter());
+    display.draw(Line::new((0, 0), (74, 74), 0x84).into_iter());
+    display.draw(Circle::new((64, 64), 8, 0x24).into_iter());
 
     // let colour = 0xD90C; // 16 bit colour of choice
     // let buffer = [(colour >> 8) as u8, colour as u8];
