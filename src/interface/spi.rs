@@ -33,9 +33,13 @@ where
     fn send_commands(&mut self, cmds: &[u8]) -> Result<(), ()> {
         self.dc.set_low();
 
-        self.spi.write(&cmds).map_err(|_| ())?;
+        self.spi.write(&[cmds[0] as u8]).map_err(|_| ())?;
 
         self.dc.set_high();
+
+        if cmds.len() > 1 {
+            self.spi.write(&cmds[1..]).map_err(|_| ())?;
+        }
 
         Ok(())
     }

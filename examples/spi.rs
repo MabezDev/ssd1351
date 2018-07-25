@@ -81,12 +81,16 @@ fn main() -> ! {
     display.display.init().unwrap();
 
     let colour = 0xD90C; // 16 bit colour of choice
-    let buffer = [(colour >> 8) as u8, colour as u8]; // convert to u8, some devices can support 16bit spi?
-    let (width, _) = display.display.get_size().dimensions();
+    let buffer = [(colour >> 8) as u8, colour as u8];
+    let dimensions = display.display.get_size();
+    let mut i = 0;
     display.display.set_draw_area((0, 0),(128, 128)).unwrap();
-    for _ in 0..width { // draw a line manually
-        display.display.draw(&buffer).unwrap();
-    }
+    display.display.draw(&buffer).unwrap();
+    display.display.set_draw_area((64, 64),(128, 128)).unwrap();
+    display.display.draw(&buffer).unwrap();
+    // for _ in 0..128 { // draw a line
+    //     display.display.draw(&buffer).unwrap();
+    // }
     
 
     asm::bkpt();
