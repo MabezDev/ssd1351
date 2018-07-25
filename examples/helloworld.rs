@@ -24,7 +24,7 @@ use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::fonts::Font6x8;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -84,8 +84,12 @@ fn main() -> ! {
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
     display.init().unwrap();
 
-    display.draw(Line::new((0, 0), (74, 74), 0x84).into_iter());
-    display.draw(Circle::new((64, 64), 8, 0x24).into_iter());
+    display.draw(Font6x8::render_str("Hello world!").into_iter());
+    display.draw(
+        Font6x8::render_str("Hello Rust!")
+            .translate((0, 16))
+            .into_iter(),
+    );
     
     asm::bkpt();
 
