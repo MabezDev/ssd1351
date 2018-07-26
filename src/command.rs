@@ -1,5 +1,7 @@
 use super::interface::DisplayInterface;
 
+const REMAP_BASE: u8 = 0b00100100;
+
 pub enum Command {
     /// Column address
     Column(u8,u8),
@@ -15,8 +17,8 @@ pub enum Command {
     ClockDiv(u8),
     /// MuxRatio
     MuxRatio(u8),
-    /// SetRemap
-    SetRemap(u8),
+    /// SetRemap - SegmentRemap, Reverse scan direction
+    SetRemap(bool, bool),
     /// Display Start Row
     StartLine(u8),
     /// DisplayOffset
@@ -55,7 +57,7 @@ impl Command {
             Command::DisplayOn(val) => ( if val { 0xAF } else { 0xAE }, [0,0,0,0,0,0], 0),
             Command::ClockDiv(val) => (0xB3, [val as u8, 0,0,0,0,0], 1),
             Command::MuxRatio(val) => (0xCA, [val as u8, 0,0,0,0,0], 1),
-            Command::SetRemap(val) => (0xA0, [val as u8, 0,0,0,0,0], 1),
+            Command::SetRemap(remap, scan) => (0xA0, [REMAP_BASE | (remap as u8) << 1 | (scan as u8) << 4, 0,0,0,0,0], 1),
             Command::Column(start, end) => (0x15, [start as u8, end as u8,0,0,0,0], 2),
             Command::Row(start, end) => (0x75, [start as u8, end as u8,0,0,0,0], 2),
             Command::StartLine(val) => (0xA1, [val as u8,0,0,0,0,0], 1),

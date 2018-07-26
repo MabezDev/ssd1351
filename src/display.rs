@@ -1,6 +1,6 @@
 //! Container to store and set display properties
 
-use command::{Command/* , AddrMode, VcomhLevel */};
+use command::{Command};
 
 use properties::DisplayRotation;
 use properties::DisplaySize;
@@ -44,7 +44,7 @@ where
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
-        // Command::SetRemap(0x74).send(&mut self.iface)?;
+        Command::SetRemap(false,false).send(&mut self.iface)?;
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
         Command::SetVsl.send(&mut self.iface)?;
