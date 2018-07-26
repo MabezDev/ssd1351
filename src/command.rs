@@ -49,33 +49,36 @@ impl Command {
         DI: DisplayInterface,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
-        let (data, len) = match self {
-            Command::CommandLock(val) => ([0xFD, val, 0,0,0,0,0], 2),
-            Command::DisplayOn(val) => ([if val { 0xAF } else { 0xAE }, 0,0,0,0,0,0], 1),
-            Command::ClockDiv(val) => ([0xB3, val as u8, 0,0,0,0,0], 2),
-            Command::MuxRatio(val) => ([0xCA, val as u8, 0,0,0,0,0], 2),
-            Command::SetRemap(val) => ([0xA0, val as u8, 0,0,0,0,0], 2),
-            Command::Column(start, end) => ([0x15, start as u8, end as u8,0,0,0,0], 3),
-            Command::Row(start, end) => ([0x75, start as u8, end as u8,0,0,0,0], 3),
-            Command::StartLine(val) => ([0xA1, val as u8,0,0,0,0,0], 2),
-            Command::DisplayOffset(val) => ([0xA2, val as u8,0,0,0,0,0], 2),
-            Command::SetGpio(val) => ([0xB5, val as u8,0,0,0,0,0], 2),
-            Command::FunctionSelect(val) => ([0xAB, val as u8,0,0,0,0,0], 2),
-            // Command::PreCharge(val) => ([0xBB, val as u8,0,0,0,0,0], 2),
-            Command::PreCharge(val) => ([0xB1, val as u8,0,0,0,0,0], 2),
-            // Command::PhaseLength(val) => ([0xB1, val as u8,0,0,0,0,0], 2),
-            Command::Vcomh(val) => ([0xBE, val as u8,0,0,0,0,0], 2),
-            Command::Invert(val) => ([if val { 0xA7 } else { 0xA6 }, 0,0,0,0,0,0], 1),
-            Command::Contrast(val) => ([0xC1, 0xC8, val as u8, 0xC8,0,0,0], 4),
-            Command::ContrastCurrent(val) => ([0xC7, val as u8,0,0,0,0,0], 2),
-            Command::SetVsl => ([0xB4,0xA0,0xB5,0x55, 0,0,0], 4),
-            Command::PreCharge2(val) => ([0xB6, val as u8, 0,0,0,0,0], 2),
-            Command::WriteRam => ([0x5C, 0,0,0,0,0,0], 1),
+        // TODO can we replace the use if the static buffers?
+        let (command, data, len) = match self {
+            Command::CommandLock(val) => (0xFD, [val, 0,0,0,0,0], 1),
+            Command::DisplayOn(val) => ( if val { 0xAF } else { 0xAE }, [0,0,0,0,0,0], 0),
+            Command::ClockDiv(val) => (0xB3, [val as u8, 0,0,0,0,0], 1),
+            Command::MuxRatio(val) => (0xCA, [val as u8, 0,0,0,0,0], 1),
+            Command::SetRemap(val) => (0xA0, [val as u8, 0,0,0,0,0], 1),
+            Command::Column(start, end) => (0x15, [start as u8, end as u8,0,0,0,0], 2),
+            Command::Row(start, end) => (0x75, [start as u8, end as u8,0,0,0,0], 2),
+            Command::StartLine(val) => (0xA1, [val as u8,0,0,0,0,0], 1),
+            Command::DisplayOffset(val) => (0xA2, [val as u8,0,0,0,0,0], 1),
+            Command::SetGpio(val) => (0xB5, [val as u8,0,0,0,0,0], 1),
+            Command::FunctionSelect(val) => (0xAB, [val as u8,0,0,0,0,0], 1),
+            Command::PreCharge(val) => (0xB1, [val as u8,0,0,0,0,0], 1),
+            Command::Vcomh(val) => (0xBE, [val as u8,0,0,0,0,0], 1),
+            Command::Invert(val) => (if val { 0xA7 } else { 0xA6 }, [0,0,0,0,0,0], 0),
+            Command::Contrast(val) => (0xC1, [0xC8, val as u8, 0xC8,0,0,0], 3),
+            Command::ContrastCurrent(val) => (0xC7, [val as u8,0,0,0,0,0], 1),
+            Command::SetVsl => (0xB4, [0xA0,0xB5,0x55, 0,0,0], 3),
+            Command::PreCharge2(val) => (0xB6, [val as u8, 0,0,0,0,0], 1),
+            Command::WriteRam => (0x5C, [0,0,0,0,0,0], 0),
         };
         
 
         // Send command over the interface
-        iface.send_commands(&data[0..len])?;
+        iface.send_command(command)?;
+
+        if len > 0 {
+            iface.send_data(&data[0..len])?;
+        }
 
         Ok(())
     }
