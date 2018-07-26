@@ -4,11 +4,11 @@
 //! methods it exposes. Look at the modes below for more information on what they expose.
 
 // pub mod displaymode;
-// pub mod graphics;
+pub mod graphics;
 // pub mod terminal;
 pub mod raw;
 pub mod displaymode;
 
-// pub use self::graphics::GraphicsMode;
+pub use self::graphics::GraphicsMode;
 // pub use self::terminal::TerminalMode;
 pub use self::raw::RawMode;

@@ -1,9 +1,25 @@
 [package]
 name = "ssd1351"
 version = "0.1.0"
-authors = ["Scott <MabezDev@gmail.com>"]
+authors = ["Scott Mabin <mabez123@gmail.com>"]
+description = "Driver crate for the SSD1351 16bit colour OLED display driver."
+keywords = ["no-std", "ssd1351", "oled", "embedded", "embedded-hal-driver"]
+repository = "https://github.com/MabezDev/ssd1351"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+exclude = [
+	".travis.yml",
+	".gitignore"
+]
 
 [dependencies]
+
+[dependencies.embedded-graphics]
+# version = "0.1.1"
+# path = "../embedded-graphics/embedded-graphics"
+git = "https://github.com/MabezDev/embedded-graphics"
+branch = "coloured-fonts"
+optional = true
 
 [dependencies.embedded-hal]
 version = "0.2.1"
@@ -33,3 +49,7 @@ codegen-units = 1
 codegen-units = 1
 debug = true
 lto = true
+
+[features]
+default = ["graphics"]
+graphics = ["embedded-graphics"]

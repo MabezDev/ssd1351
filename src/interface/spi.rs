@@ -30,13 +30,12 @@ where
     SPI: hal::blocking::spi::Write<u8>,
     DC: OutputPin,
 {
-    fn send_commands(&mut self, cmds: &[u8]) -> Result<(), ()> {
+    fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
         self.dc.set_low();
 
-        self.spi.write(&cmds).map_err(|_| ())?;
+        self.spi.write(&[cmd]).map_err(|_| ())?;
 
         self.dc.set_high();
-
         Ok(())
     }
 

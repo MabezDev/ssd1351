@@ -11,6 +11,7 @@ extern crate panic_semihosting;
 extern crate embedded_hal as ehal;
 extern crate stm32l432xx_hal as hal;
 extern crate ssd1351;
+extern crate embedded_graphics;
 
 use cortex_m::asm;
 use hal::prelude::*;
@@ -19,8 +20,11 @@ use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
 use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
-use ssd1351::mode::RawMode;
+use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
+
+use embedded_graphics::prelude::*;
+use embedded_graphics::primitives::{Circle, Line, Rect};
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -70,29 +74,20 @@ fn main() -> ! {
     );
 
     // reset the display
-    rst.set_high();
-    delay.delay_ms(5_u16);
-    rst.set_low();
-    delay.delay_ms(100_u16);
-    rst.set_high();
-    delay.delay_ms(5_u16);
+    // rst.set_high();
+    // delay.delay_ms(5_u16);
+    // rst.set_low();
+    // delay.delay_ms(100_u16);
+    // rst.set_high();
+    // delay.delay_ms(5_u16);
     
-    let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.display.init().unwrap();
+    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    display.init().unwrap();
+    display.reset(&mut rst, &mut delay);
 
-    let colour = 0xD90C; // 16 bit colour of choice
-    let buffer = [(colour >> 8) as u8, colour as u8];
-    let dimensions = display.display.get_size();
-    let mut i = 0;
-    display.display.set_draw_area((0, 0),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap();
-    display.display.set_draw_area((64, 64),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap();
-    // for _ in 0..128 { // draw a line
-    //     display.display.draw(&buffer).unwrap();
-    // }
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());
     
-
     asm::bkpt();
 
     loop {}

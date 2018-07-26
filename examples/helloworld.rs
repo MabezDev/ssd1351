@@ -11,6 +11,7 @@ extern crate panic_semihosting;
 extern crate embedded_hal as ehal;
 extern crate stm32l432xx_hal as hal;
 extern crate ssd1351;
+extern crate embedded_graphics;
 
 use cortex_m::asm;
 use hal::prelude::*;
@@ -19,8 +20,13 @@ use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
 use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
-use ssd1351::mode::RawMode;
+use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
+
+use embedded_graphics::prelude::*;
+// use embedded_graphics::fonts::Font6x8;
+// use embedded_graphics::fonts::Font8x16;
+use embedded_graphics::fonts::Font12x16;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -63,7 +69,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        1.mhz(),
+        24.mhz(),
         // 100.khz(),
         clocks,
         &mut rcc.apb2,
@@ -77,22 +83,26 @@ fn main() -> ! {
     rst.set_high();
     delay.delay_ms(5_u16);
     
-    let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.display.init().unwrap();
+    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    display.init().unwrap();
 
-    let colour = 0xD90C; // 16 bit colour of choice
-    let buffer = [(colour >> 8) as u8, colour as u8];
-    let dimensions = display.display.get_size();
     let mut i = 0;
-    display.display.set_draw_area((0, 0),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap();
-    display.display.set_draw_area((64, 64),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap();
-    // for _ in 0..128 { // draw a line
-    //     display.display.draw(&buffer).unwrap();
-    // }
+    loop {
+        display.draw(Font12x16::render_str("Wavey!", i).into_iter());
+        // display.clear();
+        delay.delay_ms(32_u16);
+        i+=1;
+        if i == 255 {
+            i = 0;
+        }
+    }
     
-
+    // display.draw(
+    //     Font6x8::render_str("Hello Rust!", 0x84)
+    //         .translate((0, 16))
+    //         .into_iter(),
+    // );
+    
     asm::bkpt();
 
     loop {}
