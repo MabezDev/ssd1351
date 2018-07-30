@@ -8,31 +8,24 @@
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate panic_semihosting;
-extern crate embedded_hal as ehal;
 extern crate stm32l432xx_hal as hal;
 extern crate ssd1351;
 extern crate embedded_graphics;
 
-use cortex_m::asm;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
-use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
+use ssd1351::prelude::*;
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
-// use embedded_graphics::fonts::Font6x8;
-// use embedded_graphics::fonts::Font8x16;
 use embedded_graphics::fonts::Font12x16;
 
-/// SPI mode
-pub const MODE: Mode = Mode {
-    phase: Phase::CaptureOnFirstTransition,
-    polarity: Polarity::IdleLow,
-};
+/// SPI mode for
+
 
 entry!(main);
 
@@ -68,9 +61,8 @@ fn main() -> ! {
     let spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
-        MODE,
-        24.mhz(),
-        // 100.khz(),
+        SSD1351_SPI_MODE,
+        4.mhz(),
         clocks,
         &mut rcc.apb2,
     );
@@ -96,16 +88,6 @@ fn main() -> ! {
             i = 0;
         }
     }
-    
-    // display.draw(
-    //     Font6x8::render_str("Hello Rust!", 0x84)
-    //         .translate((0, 16))
-    //         .into_iter(),
-    // );
-    
-    asm::bkpt();
-
-    loop {}
 }
 
 exception!(HardFault, hard_fault);
