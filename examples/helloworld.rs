@@ -67,15 +67,10 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    // reset the display
-    rst.set_high();
-    delay.delay_ms(5_u16);
-    rst.set_low();
-    delay.delay_ms(100_u16);
-    rst.set_high();
-    delay.delay_ms(5_u16);
+    
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    display.reset(rst, delay);
     display.init().unwrap();
 
     let mut i = 0;
