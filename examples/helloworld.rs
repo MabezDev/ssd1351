@@ -62,7 +62,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         SSD1351_SPI_MODE,
-        4.mhz(),
+        12.mhz(),
         clocks,
         &mut rcc.apb2,
     );
@@ -70,7 +70,7 @@ fn main() -> ! {
     
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.reset(rst, delay);
+    display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
     let mut i = 0;
