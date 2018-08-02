@@ -85,8 +85,8 @@ fn main() -> ! {
     display.init().unwrap();
     display.reset(&mut rst, &mut delay);
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x25E0_u16.into()).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8, 0xF1FA_u16.into()).into_iter());
     
     asm::bkpt();
 

@@ -93,30 +93,9 @@ use self::embedded_graphics::drawable;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics::Drawing;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::pixelcolor::PixelColor;
+use self::embedded_graphics::pixelcolor::PixelColorU16;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics::unsignedcoord::UnsignedCoord;
-
-#[cfg(feature = "graphics")]
-#[derive(Copy, Clone, PartialEq)]
-pub struct PixelColorU16(pub u16);
-
-#[cfg(feature = "graphics")]
-impl From<u16> for PixelColorU16 {
-    fn from(other: u16) -> Self {
-        PixelColorU16(other)
-    }
-}
-
-#[cfg(feature = "graphics")]
-impl From<u8> for PixelColorU16 {
-    fn from(other: u8) -> Self {
-        PixelColorU16(other as u16)
-    }
-}
-
-#[cfg(feature = "graphics")]
-impl PixelColor for PixelColorU16 {}
 
 #[cfg(feature = "graphics")]
 impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI> 
@@ -128,30 +107,7 @@ impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI>
         T: Iterator<Item = drawable::Pixel<PixelColorU16>>,
     {
         for drawable::Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            self.set_pixel(x, y, color.into());
+            self.set_pixel(x, y, color.into_inner());
         }
     }
 }
-
-// impl<DI> Drawing for GraphicsMode<DI>
-// where
-//     DI: DisplayInterface,
-// {
-//     fn draw<T>(&mut self, item_pixels: T)
-//     where
-//         T: Iterator<Item = drawable::Pixel>,
-//     {
-//         for (pos, color) in item_pixels {
-//             self.set_pixel(pos.0, pos.1, color);
-//         }
-//     }
-// }
-
-// #[cfg(feature = "graphics")]
-// pub trait Ssd1351Color : PixelColor {}
-
-// #[cfg(feature = "graphics")]
-// impl Ssd1351Color for u8 {}
-
-// #[cfg(feature = "graphics")]
-// impl PixelColor for u16 {}

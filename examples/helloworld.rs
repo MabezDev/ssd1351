@@ -73,13 +73,13 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    let mut i = 0;
+    let mut i: u16 = 0;
     loop {
-        display.draw(Font12x16::render_str("Wavey!", i).into_iter());
+        display.draw(Font12x16::render_str("Wavey!", i.into()).into_iter());
         // display.clear();
         delay.delay_ms(32_u16);
         i+=1;
-        if i == 255 {
+        if i == u16::max_value() {
             i = 0;
         }
     }
