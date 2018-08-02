@@ -1,5 +1,8 @@
 //! Display attributes
 
+/// SSD1351 Color Depth
+pub type ColorType = u16;
+
 /// Display rotation.
 ///
 /// Note that 90º and 270º rotations are not supported by

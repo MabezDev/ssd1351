@@ -25,6 +25,7 @@ use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::color::Color;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -82,11 +83,11 @@ fn main() -> ! {
     // delay.delay_ms(5_u16);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.init().unwrap();
     display.reset(&mut rst, &mut delay);
-
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());
+    display.init().unwrap();
+    
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), Color::new(0xBA60)).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8, Color::new(0x25E0)).into_iter());
     
     asm::bkpt();
 

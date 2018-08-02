@@ -22,7 +22,9 @@ use ssd1351::prelude::*;
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::fonts::Font12x16;
+// use embedded_graphics::fonts::Font12x16;
+use embedded_graphics::fonts::Font6x8;
+use ssd1351::properties::ColorType;
 
 /// SPI mode for
 
@@ -73,16 +75,17 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    let mut i = 0;
-    loop {
-        display.draw(Font12x16::render_str("Wavey!", i).into_iter());
-        // display.clear();
-        delay.delay_ms(32_u16);
-        i+=1;
-        if i == 255 {
-            i = 0;
-        }
-    }
+    display.draw(Font6x8::render_str("Wavey!", Color::new(0xBA60)).into_iter());
+    // let mut i = 0;
+    // loop {
+    //     // display.clear();
+    //     delay.delay_ms(32_u16);
+    //     i+=1;
+    //     if i == 255 {
+    //         i = 0;
+    //     }
+    // }
+    loop {}
 }
 
 exception!(HardFault, hard_fault);

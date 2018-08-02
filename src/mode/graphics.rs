@@ -4,6 +4,7 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
+use properties::ColorType;
 
 /// Raw display mode
 pub struct GraphicsMode<DI>
@@ -51,20 +52,19 @@ where
         DELAY: DelayMs<u8>,
     {
         rst.set_high();
-        delay.delay_ms(1);
+        delay.delay_ms(50);
         rst.set_low();
-        delay.delay_ms(10);
+        delay.delay_ms(50);
         rst.set_high();
     }
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
-    pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
         let (display_width, display_height) = self.display.get_size().dimensions();
         //TODO rotation
         // let display_rotation = self.display.get_rotation();
         self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
-        let color = value as u16 * 257; // TODO remove this hack to convert 8bit colours to 16bit when embeddedgraphics supports it
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
 
@@ -98,12 +98,14 @@ impl<DI> Drawing for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
+    type C = ColorType;
+
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel>,
+        T: Iterator<Item = drawable::Pixel<Self::C>>
     {
         for (pos, color) in item_pixels {
-            self.set_pixel(pos.0, pos.1, color);
+            self.set_pixel(pos.0, pos.1, color.value());
         }
     }
 }
