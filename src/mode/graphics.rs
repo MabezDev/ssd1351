@@ -59,12 +59,12 @@ where
 
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
-    pub fn set_pixel(&mut self, x: u32, y: u32, value: u8) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
         let (display_width, display_height) = self.display.get_size().dimensions();
         //TODO rotation
         // let display_rotation = self.display.get_rotation();
         self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
-        let color = value as u16 * 257; // TODO remove this hack to convert 8bit colours to 16bit when embeddedgraphics supports it
+        // let color = value as u16 * 257; // TODO remove this hack to convert 8bit colours to 16bit when embeddedgraphics supports it
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
 
@@ -92,18 +92,66 @@ extern crate embedded_graphics;
 use self::embedded_graphics::drawable;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics::Drawing;
+#[cfg(feature = "graphics")]
+use self::embedded_graphics::pixelcolor::PixelColor;
+#[cfg(feature = "graphics")]
+use self::embedded_graphics::unsignedcoord::UnsignedCoord;
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing for GraphicsMode<DI>
-where
+#[derive(Copy, Clone, PartialEq)]
+pub struct PixelColorU16(pub u16);
+
+#[cfg(feature = "graphics")]
+impl From<u16> for PixelColorU16 {
+    fn from(other: u16) -> Self {
+        PixelColorU16(other)
+    }
+}
+
+#[cfg(feature = "graphics")]
+impl From<u8> for PixelColorU16 {
+    fn from(other: u8) -> Self {
+        PixelColorU16(other as u16)
+    }
+}
+
+#[cfg(feature = "graphics")]
+impl PixelColor for PixelColorU16 {}
+
+#[cfg(feature = "graphics")]
+impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI> 
+    where
     DI: DisplayInterface,
 {
     fn draw<T>(&mut self, item_pixels: T)
     where
-        T: Iterator<Item = drawable::Pixel>,
+        T: Iterator<Item = drawable::Pixel<PixelColorU16>>,
     {
-        for (pos, color) in item_pixels {
-            self.set_pixel(pos.0, pos.1, color);
+        for drawable::Pixel(UnsignedCoord(x, y), color) in item_pixels {
+            self.set_pixel(x, y, color.into());
         }
     }
 }
+
+// impl<DI> Drawing for GraphicsMode<DI>
+// where
+//     DI: DisplayInterface,
+// {
+//     fn draw<T>(&mut self, item_pixels: T)
+//     where
+//         T: Iterator<Item = drawable::Pixel>,
+//     {
+//         for (pos, color) in item_pixels {
+//             self.set_pixel(pos.0, pos.1, color);
+//         }
+//     }
+// }
+
+// #[cfg(feature = "graphics")]
+// pub trait Ssd1351Color : PixelColor {}
+
+// #[cfg(feature = "graphics")]
+// impl Ssd1351Color for u8 {}
+
+// #[cfg(feature = "graphics")]
+// impl PixelColor for u16 {}
