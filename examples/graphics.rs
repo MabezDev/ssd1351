@@ -82,13 +82,11 @@ fn main() -> ! {
     // delay.delay_ms(5_u16);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.init().unwrap();
     display.reset(&mut rst, &mut delay);
+    display.init().unwrap();
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x25E0_u16.into()).into_iter());
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x0D85_u16.into()).into_iter());
     display.draw(Circle::new(Coord::new(64, 64), 8, 0xF1FA_u16.into()).into_iter());
-    
-    asm::bkpt();
 
     loop {}
 }
