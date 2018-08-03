@@ -14,14 +14,6 @@ exclude = [
 
 [dependencies]
 
-[dependencies.embedded-graphics]
-# version = "0.1.1"
-# path = "../embedded-graphics/embedded-graphics"
-# git = "https://github.com/MabezDev/embedded-graphics"
-git = "https://github.com/jamwaffles/embedded-graphics"
-# branch = "coloured-fonts"
-optional = true
-
 [dependencies.embedded-hal]
 version = "0.2.1"
 features = ["unproven"]
@@ -41,6 +33,7 @@ cortex-m-semihosting = "0.3.0"
 cortex-m = "0.5.2"
 nb = "0.1.1"
 cortex-m-rt = "0.5.1"
+embedded-graphics = { version = "0.3.0", optional = true }
 
 [profile.dev]
 incremental = false
