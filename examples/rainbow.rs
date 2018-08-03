@@ -24,8 +24,6 @@ use hal::delay::Delay;
 use embedded_graphics::prelude::*;
 use embedded_graphics::fonts::Font12x16;
 
-/// SPI mode for
-
 
 entry!(main);
 
@@ -73,15 +71,17 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    let mut i: u16 = 0xFFFF;
+    let mut hsl = HSL { h: 0.0 , s: 1.0 , l: 0.5 };
     loop {
-        display.draw(Font12x16::render_str("Wavey!", i.into()).into_iter());
-        // display.clear();
-        delay.delay_ms(32_u16);
-        i+=1;
-        if i == u16::max_value() {
-            i = 0;
+        let (r, g, b) = hsl.to_rgb();
+        let color: u16 = (r as u16) << 11 | (g as u16) << 5 | b as u16;
+        display.draw(Font12x16::render_str("Hello", color.into()).into_iter());
+        display.draw(Font12x16::render_str("World", color.into()).translate(Coord::new(0, 18)).into_iter());
+        hsl.h += 1.0;
+        if hsl.h == 360.0 {
+            hsl.h = 0.0;
         }
+        delay.delay_ms(25_u16);
     }
 }
 
@@ -95,4 +95,78 @@ exception!(*, default_handler);
 
 fn default_handler(irqn: i16) {
     panic!("Unhandled exception (IRQn = {})", irqn);
+}
+
+// https://crates.io/crates/hsl ripped relavate parts from here, for no_std
+
+/// Color represented in HSL
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd, Default)]
+pub struct HSL {
+    /// Hue in 0-360 degree
+    pub h: f64,
+    /// Saturation in 0...1 (percent)
+    pub s: f64,
+    /// Luminosity in 0...1 (percent)
+    pub l: f64,
+}
+
+impl HSL {
+    /// Convert HSL color to RGB
+    ///
+    /// ```rust
+    /// use hsl::HSL;
+    ///
+    /// let cyan = HSL { h: 180_f64, s: 1_f64, l: 0.5_f64 };
+    /// assert_eq!(cyan.to_rgb(), (0, 255, 255));
+    /// ```
+    pub fn to_rgb(&self) -> (u8, u8, u8) {
+        if self.s == 0.0 {
+            // Achromatic, i.e., grey.
+            let l = percent_to_byte(self.l);
+            return (l, l, l);
+        }
+
+        let h = self.h / 360.0; // treat this as 0..1 instead of degrees
+        let s = self.s;
+        let l = self.l;
+
+        let q = if l < 0.5 {
+            l * (1.0 + s)
+        } else {
+            l + s - (l * s)
+        };
+        let p = 2.0 * l - q;
+
+        (percent_to_byte(hue_to_rgb(p, q, h + 1.0 / 3.0)),
+         percent_to_byte(hue_to_rgb(p, q, h)),
+         percent_to_byte(hue_to_rgb(p, q, h - 1.0 / 3.0)))
+    }   
+}
+
+fn percent_to_byte(percent: f64) -> u8 {
+    (percent * 255.0) as u8
+}
+
+/// Convert Hue to RGB Ratio
+///
+/// From <https://github.com/jariz/vibrant.js/> by Jari Zwarts
+fn hue_to_rgb(p: f64, q: f64, t: f64) -> f64 {
+    // Normalize
+    let t = if t < 0.0 {
+        t + 1.0
+    } else if t > 1.0 {
+        t - 1.0
+    } else {
+        t
+    };
+
+    if t < 1.0 / 6.0 {
+        p + (q - p) * 6.0 * t
+    } else if t < 1.0 / 2.0 {
+        q
+    } else if t < 2.0 / 3.0 {
+        p + (q - p) * (2.0 / 3.0 - t) * 6.0
+    } else {
+        p
+    }
 }

@@ -13,7 +13,6 @@ extern crate stm32l432xx_hal as hal;
 extern crate ssd1351;
 extern crate embedded_graphics;
 
-use cortex_m::asm;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
@@ -24,7 +23,7 @@ use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::primitives::{Circle, Line};
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -72,23 +71,13 @@ fn main() -> ! {
         clocks,
         &mut rcc.apb2,
     );
-
-    // reset the display
-    // rst.set_high();
-    // delay.delay_ms(5_u16);
-    // rst.set_low();
-    // delay.delay_ms(100_u16);
-    // rst.set_high();
-    // delay.delay_ms(5_u16);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.init().unwrap();
     display.reset(&mut rst, &mut delay);
+    display.init().unwrap();
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x84).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8, 0x24).into_iter());
-    
-    asm::bkpt();
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x0D85_u16.into()).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8, 0xF1FA_u16.into()).into_iter());
 
     loop {}
 }
