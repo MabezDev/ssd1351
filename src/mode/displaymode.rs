@@ -1,4 +1,4 @@
-//! Abstraction of different operating modes for the SSD1306
+//! Abstraction of different operating modes for the SSD1351
 
 use interface::DisplayInterface;
 use display::Display;

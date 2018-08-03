@@ -64,7 +64,6 @@ where
         //TODO rotation
         // let display_rotation = self.display.get_rotation();
         self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
-        // let color = value as u16 * 257; // TODO remove this hack to convert 8bit colours to 16bit when embeddedgraphics supports it
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
 
