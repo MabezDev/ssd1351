@@ -23,13 +23,13 @@ use ssd1351::prelude::*;
 use hal::delay::Delay;
 use hal::rtc::Rtc;
 use hal::datetime::{Date, Time};
-use hal::pwr::Pwr;
 use core::fmt::Write;
 use heapless::String;
 use heapless::consts::*;
 
 use embedded_graphics::prelude::*;
 use embedded_graphics::fonts::Font12x16;
+use embedded_graphics::fonts::Font6x12;
 
 /// SPI mode for
 
@@ -69,7 +69,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         SSD1351_SPI_MODE,
-        8.mhz(),
+        4.mhz(),
         clocks,
         &mut rcc.apb2,
     );
@@ -91,10 +91,10 @@ fn main() -> ! {
         date = rtc.get_date();
         {
             write!(buffer, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds).unwrap();
-            display.draw(Font12x16::render_str(buffer.as_str(), 0x880B_u16.into()).into_iter());
+            display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(Coord::new(10, 40)).into_iter());
             buffer.clear(); // reset the buffer
             write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
-            display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(Coord::new(0, 20)).into_iter());
+            display.draw(Font6x12::render_str(buffer.as_str(), 0x880B_u16.into()).translate(Coord::new(24, 60)).into_iter());
             buffer.clear(); // reset the buffer
         }
     }
