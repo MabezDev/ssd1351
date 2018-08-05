@@ -21,7 +21,8 @@ use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use ssd1351::prelude::*;
 use hal::delay::Delay;
-use hal::rtc::{Rtc, Date, Time};
+use hal::rtc::Rtc;
+use hal::datetime::{Date, Time};
 use hal::pwr::Pwr;
 use core::fmt::Write;
 use heapless::String;
@@ -49,7 +50,7 @@ fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let mut delay = Delay::new(cp.SYST, clocks);
 
-    let mut pwr = Pwr::pwr(&mut rcc.apb1r1);
+    let mut pwr = p.PWR.constrain(&mut rcc.apb1r1);
     let rtc = Rtc::rtc(p.RTC, &mut rcc.apb1r1, &mut rcc.bdcr, &mut pwr.cr1);
 
     let mut rst = gpioa
@@ -73,8 +74,8 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    let mut time = Time::new(21, 57, 32, false);
-    let mut date = Date::new(1, 24, 4, 2018);
+    let mut time = Time::new(21.hours(), 57.minutes(), 32.seconds(), false);
+    let mut date = Date::new(1.day(), 24.date(), 4.month(), 2018.year());
     
     rtc.set_time(&time);
     rtc.set_date(&date);
@@ -95,7 +96,6 @@ fn main() -> ! {
             write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
             display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(Coord::new(0, 20)).into_iter());
             buffer.clear(); // reset the buffer
-            // delay.delay_ms(333_u16);
         }
     }
 }
