@@ -71,7 +71,7 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    let mut hsl = HSL { h: 0.0 , s: 1.0 , l: 0.5 };
+    let mut hsl = HSL { h: 0.0 , s: 0.8 , l: 0.5 };
     loop {
         let (r, g, b) = hsl.to_rgb();
         let color: u16 = (r as u16) << 11 | (g as u16) << 5 | b as u16;
