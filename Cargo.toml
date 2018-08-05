@@ -24,9 +24,7 @@ version = "0.2.1"
 features = ["stm32l4x2", "rt"]
 
 [dev-dependencies.stm32l432xx-hal]
-# git = "https://github.com/MabezDev/stm32l432xx-hal"
-# branch = "rtc"
-path = "../../hal/stm32l432xx-hal"
+version = "0.1.0"
 
 [dev-dependencies]
 panic-semihosting = "0.3.0"
