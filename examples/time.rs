@@ -8,25 +8,30 @@
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate panic_semihosting;
-extern crate embedded_hal as ehal;
 extern crate stm32l432xx_hal as hal;
 extern crate ssd1351;
+extern crate embedded_graphics;
+extern crate heapless;
 
-use cortex_m::asm;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
-use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
-use ssd1351::mode::RawMode;
+use ssd1351::mode::{GraphicsMode};
+use ssd1351::prelude::*;
 use hal::delay::Delay;
+use hal::rtc::{Rtc, Date, Time};
+use hal::pwr::Pwr;
+use core::fmt::Write;
+use heapless::String;
+use heapless::consts::*;
 
-/// SPI mode
-pub const MODE: Mode = Mode {
-    phase: Phase::CaptureOnFirstTransition,
-    polarity: Polarity::IdleLow,
-};
+use embedded_graphics::prelude::*;
+use embedded_graphics::fonts::Font12x16;
+
+/// SPI mode for
+
 
 entry!(main);
 
@@ -36,16 +41,16 @@ fn main() -> ! {
     let mut flash = p.FLASH.constrain();
     let mut rcc = p.RCC.constrain();
 
-    // TRY the other clock configuration
-    // let clocks = rcc.cfgr.freeze(&mut flash.acr);
     let clocks = rcc.cfgr.sysclk(80.mhz()).pclk1(80.mhz()).pclk2(80.mhz()).freeze(&mut flash.acr);
-    // let clocks = rcc.cfgr.sysclk(64.mhz()).pclk1(32.mhz()).freeze(&mut flash.acr);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
     let mut gpiob = p.GPIOB.split(&mut rcc.ahb2);
 
     let cp = cortex_m::Peripherals::take().unwrap();
     let mut delay = Delay::new(cp.SYST, clocks);
+
+    let mut pwr = Pwr::pwr(&mut rcc.apb1r1);
+    let rtc = Rtc::rtc(p.RTC, &mut rcc.apb1r1, &mut rcc.bdcr, &mut pwr.cr1);
 
     let mut rst = gpioa
         .pa8
@@ -62,40 +67,37 @@ fn main() -> ! {
     let spi = Spi::spi1(
         p.SPI1,
         (sck, miso, mosi),
-        MODE,
-        1.mhz(),
-        // 100.khz(),
+        SSD1351_SPI_MODE,
+        8.mhz(),
         clocks,
         &mut rcc.apb2,
     );
 
-    // reset the display
-    rst.set_high();
-    delay.delay_ms(5_u16);
-    rst.set_low();
-    delay.delay_ms(100_u16);
-    rst.set_high();
-    delay.delay_ms(5_u16);
+    let mut time = Time::new(21, 57, 32, false);
+    let mut date = Date::new(1, 24, 4, 2018);
     
-    let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    /* display.display.init().unwrap();
-
-    let colour = 0xD90C; // 16 bit colour of choice
-    let buffer = [(colour >> 8) as u8, colour as u8];
-    let dimensions = display.display.get_size();
-    let mut i = 0;
-    display.display.set_draw_area((0, 0),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap();
-    display.display.set_draw_area((64, 64),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap(); */
-    // for _ in 0..128 { // draw a line
-    //     display.display.draw(&buffer).unwrap();
-    // }
+    rtc.set_time(&time);
+    rtc.set_date(&date);
     
+    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    display.reset(&mut rst, &mut delay);
+    display.init().unwrap();
 
-    asm::bkpt();
-
-    loop {}
+    // let mut buffer: [u8; 256] = [0; 256];
+    let mut buffer: String<U16> = String::new();
+    loop {
+        time = rtc.get_time();
+        date = rtc.get_date();
+        {
+            write!(buffer, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds).unwrap();
+            display.draw(Font12x16::render_str(buffer.as_str(), 0x880B_u16.into()).into_iter());
+            buffer.clear(); // reset the buffer
+            write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
+            display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(Coord::new(0, 20)).into_iter());
+            buffer.clear(); // reset the buffer
+            // delay.delay_ms(333_u16);
+        }
+    }
 }
 
 exception!(HardFault, hard_fault);
