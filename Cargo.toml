@@ -13,7 +13,8 @@ exclude = [
 ]
 
 [dependencies]
-embedded-graphics = { version = "0.3.0", optional = true }
+# embedded-graphics = { version = "0.3.0", optional = true }
+embedded-graphics = { path="../embedded-graphics/embedded-graphics", optional = true }
 
 [dependencies.embedded-hal]
 version = "0.2.1"

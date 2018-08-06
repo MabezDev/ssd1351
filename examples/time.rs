@@ -81,22 +81,25 @@ fn main() -> ! {
     rtc.set_date(&date);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let (dw, dh) = display.get_dimensions();
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    // let mut buffer: [u8; 256] = [0; 256];
     let mut buffer: String<U16> = String::new();
     loop {
         time = rtc.get_time();
         date = rtc.get_date();
-        {
-            write!(buffer, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds).unwrap();
-            display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(Coord::new(10, 40)).into_iter());
-            buffer.clear(); // reset the buffer
-            write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
-            display.draw(Font6x12::render_str(buffer.as_str(), 0x880B_u16.into()).translate(Coord::new(24, 60)).into_iter());
-            buffer.clear(); // reset the buffer
-        }
+        
+        write!(buffer, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds).unwrap();
+        let (w, h) = Font12x16::<u32>::measure_str(buffer.as_str());
+        let centre = Coord::new(((dw / 2) as i32) - (w / 2) as i32, 40);
+        display.draw(Font12x16::render_str(buffer.as_str(), 0xF818_u16.into()).translate(centre).into_iter());
+        buffer.clear(); // reset the buffer
+        write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
+        let (w, h) = Font6x12::<u32>::measure_str(buffer.as_str());
+        display.draw(Font6x12::render_str(buffer.as_str(), 0x880B_u16.into()).translate(Coord::new(((dw / 2) as i32 ) - (w / 2) as i32, 60)).into_iter());
+        buffer.clear(); // reset the buffer
+        
     }
 }
 
