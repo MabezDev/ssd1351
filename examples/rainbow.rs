@@ -75,8 +75,8 @@ fn main() -> ! {
     loop {
         let (r, g, b) = hsl.to_rgb();
         let color: u16 = (r as u16) << 11 | (g as u16) << 5 | b as u16;
-        display.draw(Font12x16::render_str("Hello", color.into()).into_iter());
-        display.draw(Font12x16::render_str("World", color.into()).translate(Coord::new(0, 18)).into_iter());
+        display.draw(Font12x16::render_str("Hello").with_stroke(Some(color.into())).into_iter());
+        display.draw(Font12x16::render_str("World").with_stroke(Some(color.into())).translate(Coord::new(0, 18)).into_iter());
         hsl.h += 1.0;
         if hsl.h == 360.0 {
             hsl.h = 0.0;

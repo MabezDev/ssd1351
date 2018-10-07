@@ -105,8 +105,11 @@ impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI>
     where
         T: Iterator<Item = drawable::Pixel<PixelColorU16>>,
     {
+        let (width, height) = self.display.get_size().dimensions();
         for drawable::Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            self.set_pixel(x, y, color.into_inner());
+            if x <= width.into() && y <= height.into() {
+                self.set_pixel(x, y, color.into_inner());
+            }
         }
     }
 }

@@ -62,7 +62,7 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         SSD1351_SPI_MODE,
-        12.mhz(),
+        2.mhz(),
         clocks,
         &mut rcc.apb2,
     );
@@ -75,7 +75,7 @@ fn main() -> ! {
 
     let mut i: u16 = 0xFFFF;
     loop {
-        display.draw(Font12x16::render_str("Wavey!", i.into()).into_iter());
+        display.draw(Font12x16::render_str("Wavey! - superlongo stringer").with_stroke(Some(i.into())).into_iter());
         // display.clear();
         delay.delay_ms(32_u16);
         i+=1;

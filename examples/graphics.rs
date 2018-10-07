@@ -76,8 +76,8 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74), 0x0D85_u16.into()).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8, 0xF1FA_u16.into()).into_iter());
+    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
+    display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
 
     loop {}
 }
