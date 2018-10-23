@@ -1,6 +1,6 @@
 [package]
 name = "ssd1351"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Scott Mabin <mabez123@gmail.com>"]
 description = "Driver crate for the SSD1351 16bit colour OLED display driver."
 keywords = ["no-std", "ssd1351", "oled", "embedded", "embedded-hal-driver"]
@@ -15,7 +15,7 @@ exclude = [
 ]
 
 [dependencies]
-embedded-graphics = { version = "0.4.1", optional = true }
+embedded-graphics = { version = "0.4.4", optional = true }
 
 [dependencies.embedded-hal]
 version = "0.2.1"
