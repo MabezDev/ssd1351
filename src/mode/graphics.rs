@@ -4,6 +4,7 @@ use hal::blocking::delay::DelayMs;
 use hal::digital::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
+use properties::DisplayRotation;
 
 /// Graphics Mode for the display
 pub struct GraphicsMode<DI>
