@@ -50,9 +50,9 @@ fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let mut delay = Delay::new(cp.SYST, clocks);
 
-    let mut rst = gpioa
-        .pa8
-        .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+    let mut rst = gpiob
+        .pb0
+        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
     let dc = gpiob
         .pb1

@@ -44,7 +44,7 @@ where
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
-        Command::SetRemap(false,false).send(&mut self.iface)?;
+        Command::SetRemap(false,true).send(&mut self.iface)?; // Rotation0
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
         Command::SetVsl.send(&mut self.iface)?;
@@ -97,8 +97,6 @@ where
         self.display_size
     }
 
-    // TODO: Replace (u8, u8) with a dimensioney type for consistency
-    // TOOD: Make doc tests work
     /// Get display dimensions, taking into account the current rotation of the display
     ///
     /// ```rust
@@ -113,18 +111,18 @@ where
     /// #
     /// let disp = Display::new(
     ///     interface,
-    ///     DisplaySize::Display128x64,
+    ///     DisplaySize::Display128x128,
     ///     DisplayRotation::Rotate0
     /// );
-    /// assert_eq!(disp.get_dimensions(), (128, 64));
+    /// assert_eq!(disp.get_dimensions(), (128, 128));
     ///
     /// # let interface = FakeInterface {};
     /// let rotated_disp = Display::new(
     ///     interface,
-    ///     DisplaySize::Display128x64,
+    ///     DisplaySize::Display128x128,
     ///     DisplayRotation::Rotate90
     /// );
-    /// assert_eq!(rotated_disp.get_dimensions(), (64, 128));
+    /// assert_eq!(rotated_disp.get_dimensions(), (128, 128));
     /// ```
     pub fn get_dimensions(&self) -> (u8, u8) {
         let (w, h) = self.display_size.dimensions();
@@ -143,25 +141,21 @@ where
     /// Set the display rotation
     pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
         self.display_rotation = display_rotation;
-        // TODO
-        // match display_rotation {
-        //     DisplayRotation::Rotate0 => {
-        //         Command::SegmentRemap(true).send(&mut self.iface)?;
-        //         Command::ReverseComDir(true).send(&mut self.iface)?;
-        //     }
-        //     DisplayRotation::Rotate90 => {
-        //         Command::SegmentRemap(false).send(&mut self.iface)?;
-        //         Command::ReverseComDir(true).send(&mut self.iface)?;
-        //     }
-        //     DisplayRotation::Rotate180 => {
-        //         Command::SegmentRemap(false).send(&mut self.iface)?;
-        //         Command::ReverseComDir(false).send(&mut self.iface)?;
-        //     }
-        //     DisplayRotation::Rotate270 => {
-        //         Command::SegmentRemap(true).send(&mut self.iface)?;
-        //         Command::ReverseComDir(false).send(&mut self.iface)?;
-        //     }
-        // };
+        
+        match display_rotation {
+            DisplayRotation::Rotate0 => {
+                Command::SetRemap(false,true).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate90 => {
+                Command::SetRemap(true,true).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate180 => {
+                Command::SetRemap(true,false).send(&mut self.iface)?;
+            }
+            DisplayRotation::Rotate270 => {
+                Command::SetRemap(false,false).send(&mut self.iface)?;
+            }
+        };
 
         Ok(())
     }

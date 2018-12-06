@@ -20,6 +20,7 @@ use rt::ExceptionFrame;
 use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::RawMode;
+use ssd1351::properties::DisplayRotation;
 use hal::delay::Delay;
 
 /// SPI mode
@@ -47,9 +48,9 @@ fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let mut delay = Delay::new(cp.SYST, clocks);
 
-    let mut rst = gpioa
-        .pa8
-        .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+    let mut rst = gpiob
+        .pb0
+        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
     let dc = gpiob
         .pb1
@@ -78,16 +79,18 @@ fn main() -> ! {
     delay.delay_ms(5_u16);
     
     let mut display: RawMode<_> = Builder::new().connect_spi(spi, dc).into();
-    /* display.display.init().unwrap();
+    display.display.init().unwrap();
 
     let colour = 0xD90C; // 16 bit colour of choice
     let buffer = [(colour >> 8) as u8, colour as u8];
     let dimensions = display.display.get_size();
     let mut i = 0;
+    display.display.set_rotation(DisplayRotation::Rotate270).unwrap();
     display.display.set_draw_area((0, 0),(128, 128)).unwrap();
     display.display.draw(&buffer).unwrap();
     display.display.set_draw_area((64, 64),(128, 128)).unwrap();
-    display.display.draw(&buffer).unwrap(); */
+    display.display.draw(&buffer).unwrap();
+    
     // for _ in 0..128 { // draw a line
     //     display.display.draw(&buffer).unwrap();
     // }

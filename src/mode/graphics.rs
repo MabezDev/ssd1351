@@ -5,7 +5,7 @@ use hal::digital::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
 
-/// Raw display mode
+/// Graphics Mode for the display
 pub struct GraphicsMode<DI>
 where
     DI: DisplayInterface,
@@ -29,7 +29,7 @@ where
 }
 
 impl<DI: DisplayInterface> GraphicsMode<DI> {
-    /// Create a new raw display mode
+    /// Create a new grahpics display interface
     pub fn new(display: Display<DI>) -> Self {
         GraphicsMode { display }
     }
@@ -39,7 +39,7 @@ impl<DI> GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
-    /// Clear the display buffer. You need to call `disp.flush()` for any effect on the screen
+    /// Clear the display
     pub fn clear(&mut self) {
         self.display.clear().unwrap();
     }
@@ -61,8 +61,6 @@ where
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
         let (display_width, display_height) = self.display.get_size().dimensions();
-        //TODO rotation
-        // let display_rotation = self.display.get_rotation();
         self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
@@ -75,9 +73,9 @@ where
     }
 
     /// Set the display rotation
-    // pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
-    //     self.display.set_rotation(rot)
-    // }
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+        self.display.set_rotation(rot)
+    }
 
     /// Get display dimensions, taking into account the current rotation of the display
     pub fn get_dimensions(&self) -> (u8, u8) {
