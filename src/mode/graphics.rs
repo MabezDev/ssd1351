@@ -62,7 +62,12 @@ where
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
         let (display_width, display_height) = self.display.get_size().dimensions();
-        self.display.set_draw_area((y as u8, x as u8), (display_width, display_height)).unwrap();
+        let rot = self.display.get_rotation();
+        let (nx, ny) = match rot {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
+        };
+        self.display.set_draw_area((nx as u8, ny as u8), (display_width, display_height)).unwrap();
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
     }
 

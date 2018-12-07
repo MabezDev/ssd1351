@@ -19,6 +19,7 @@ use rt::ExceptionFrame;
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use ssd1351::prelude::*;
+use ssd1351::properties::DisplayRotation;
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;
@@ -46,9 +47,9 @@ fn main() -> ! {
     let cp = cortex_m::Peripherals::take().unwrap();
     let mut delay = Delay::new(cp.SYST, clocks);
 
-    let mut rst = gpioa
-        .pa8
-        .into_push_pull_output(&mut gpioa.moder, &mut gpioa.otyper);
+    let mut rst = gpiob
+        .pb0
+        .into_push_pull_output(&mut gpiob.moder, &mut gpiob.otyper);
 
     let dc = gpiob
         .pb1
@@ -73,16 +74,21 @@ fn main() -> ! {
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    let mut i: u16 = 0xFFFF;
-    loop {
-        display.draw(Font12x16::render_str("Wavey! - superlongo stringer").with_stroke(Some(i.into())).into_iter());
-        // display.clear();
-        delay.delay_ms(32_u16);
-        i+=1;
-        if i == u16::max_value() {
-            i = 0;
-        }
-    }
+    let i: u16 = 0xFFFF;
+    // display.set_rotation(DisplayRotation::Rotate270).unwrap();
+    display.draw(Font12x16::render_str("Wave").with_stroke(Some(i.into())).into_iter());
+
+    // loop {
+    //     display.draw(Font12x16::render_str("Wavey! - superlongo stringer").with_stroke(Some(i.into())).into_iter());
+    //     // display.clear();
+    //     delay.delay_ms(32_u16);
+    //     i+=1;
+    //     if i == u16::max_value() {
+    //         i = 0;
+    //     }
+    // }
+
+    loop {}
 }
 
 exception!(HardFault, hard_fault);

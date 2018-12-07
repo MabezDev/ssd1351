@@ -44,7 +44,6 @@ where
         Command::MuxRatio(display_height - 1).send(&mut self.iface)?;
         Command::DisplayOffset(0).send(&mut self.iface)?;
         Command::StartLine(0).send(&mut self.iface)?;
-        Command::SetRemap(false,true).send(&mut self.iface)?; // Rotation0
         Command::SetGpio(0x00).send(&mut self.iface)?;
         Command::FunctionSelect(0x01).send(&mut self.iface)?;
         Command::SetVsl.send(&mut self.iface)?;
@@ -56,6 +55,8 @@ where
         Command::PreCharge2(0x01).send(&mut self.iface)?;
         Command::Vcomh(0x05).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
+
+        self.set_rotation(DisplayRotation::Rotate0).unwrap();
 
         self.clear()?;
         
@@ -144,16 +145,16 @@ where
         
         match display_rotation {
             DisplayRotation::Rotate0 => {
-                Command::SetRemap(false,true).send(&mut self.iface)?;
+                Command::SetRemap(false, false, true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate90 => {
-                Command::SetRemap(true,true).send(&mut self.iface)?;
+                Command::SetRemap(false, true, true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate180 => {
-                Command::SetRemap(true,false).send(&mut self.iface)?;
+                Command::SetRemap(false, true, false).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate270 => {
-                Command::SetRemap(false,false).send(&mut self.iface)?;
+                Command::SetRemap(true, false, false).send(&mut self.iface)?;
             }
         };
 
