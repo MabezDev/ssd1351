@@ -27,9 +27,7 @@ where
     /// Create new RawMode instance
     fn new(display: Display<DI>) -> Self {
         RawMode { 
-            display: display,
-            #[cfg(feature = "buffered")]
-            buffer: [0u8; 128 * 128 * 2]
+            display: display
         }
     }
 
@@ -56,12 +54,20 @@ where
 }
 
 impl<DI: DisplayInterface> RawMode<DI> {
+    #[cfg(not(feature = "buffered"))]
     /// Create a new raw display mode
     pub fn new(display: Display<DI>) -> Self {
         RawMode { 
             display: display,
-            #[cfg(feature = "buffered")]
-            buffer: [0u8; 128 * 128 * 2]
+        }
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Create a new raw display mode
+    pub fn new(display: Display<DI>, buffer: [u8; 128 * 128 * 2]) -> Self {
+        RawMode { 
+            display: display,
+            buffer: buffer
         }
     }
 }
