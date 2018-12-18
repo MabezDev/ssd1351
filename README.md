@@ -2,7 +2,7 @@
 
 ## Features
 - [`embedded-graphics`](https://github.com/jamwaffles/embedded-graphics) support
-- Full 16bit colour support for primitives and fonts (still only 8bit for images)
+- Full 16bit colour support for primitives and fonts and images
 - Bufferless
 - Rotation Support
 
