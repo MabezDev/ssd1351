@@ -48,3 +48,4 @@ lto = true
 [features]
 default = ["graphics"]
 graphics = ["embedded-graphics"]
+buffered = []

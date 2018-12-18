@@ -21,6 +21,8 @@ pub enum DisplayRotation {
 pub enum DisplaySize {
     /// 128 by 128 pixels
     Display128x128,
+    /// 128 by 64 pixels
+    Display128x64,
 }
 
 impl DisplaySize {
@@ -28,7 +30,8 @@ impl DisplaySize {
     // TODO: Use whatever vec2 impl I decide to use here
     pub fn dimensions(&self) -> (u8, u8) {
         match *self {
-            DisplaySize::Display128x128 => (128, 128)
+            DisplaySize::Display128x128 => (128, 128),
+            DisplaySize::Display128x64 => (128, 64)
         }
     }
 }

@@ -15,20 +15,36 @@ use super::mode::raw::RawMode;
 pub struct Builder {
     display_size: DisplaySize,
     rotation: DisplayRotation,
+    #[cfg(feature = "buffered")]
+    buffer: [u8; 128 * 128 * 2],
 }
 
-impl Default for Builder {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// impl Default for Builder {
+//     fn default() -> Self {
+//         #[cfg(not(feature = "buffered"))]
+//         Self::new()
+//         #[cfg(feature = "buffered")]
+//         Self::new()
+//     }
+// }
 
 impl Builder {
+    #[cfg(not(feature = "buffered"))]
     /// Create new builder with a default size of 128 x 128 pixels and no rotation.
     pub fn new() -> Self {
         Self {
             display_size: DisplaySize::Display128x128,
             rotation: DisplayRotation::Rotate0
+        }
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Create new builder with a default size of 128 x 128 pixels and no rotation.
+    pub fn new(buffer: [u8; 128 * 128 * 2]) -> Self {
+        Self {
+            display_size: DisplaySize::Display128x128,
+            rotation: DisplayRotation::Rotate0,
+            buffer: buffer
         }
     }
 
@@ -59,7 +75,14 @@ impl Builder {
     {
         let properties =
             Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
-        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+        #[cfg(not(feature = "buffered"))]
+        {
+            return DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties);
+        }
+        #[cfg(feature = "buffered")]
+        {
+            return DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, self.buffer);
+        }
     }
 
 }
