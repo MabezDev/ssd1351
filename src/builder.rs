@@ -59,6 +59,7 @@ impl Builder {
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
+        assert_eq!(buffer.len(), 128 * 128 * 2);
         let properties =
             Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
         DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, buffer)

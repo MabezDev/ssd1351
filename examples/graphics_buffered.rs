@@ -20,7 +20,7 @@ use hal::delay::Delay;
 // use cortex_m::singleton;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line, Rect};
+use embedded_graphics::primitives::{Rect};
 
 /// SPI mode
 pub const MODE: Mode = Mode {
