@@ -55,9 +55,18 @@ impl<DI> GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
+    #[cfg(not(feature = "buffered"))]
     /// Clear the display
     pub fn clear(&mut self) {
         self.display.clear().unwrap();
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Clear the display
+    pub fn clear(&mut self) {
+        for i in 0..self.buffer.len() {
+            self.buffer[i] = 0u8;
+        }
     }
 
     /// Reset display
