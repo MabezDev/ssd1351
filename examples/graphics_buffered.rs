@@ -20,6 +20,7 @@ use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
+use cortex_m::singleton;
 
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
@@ -68,8 +69,10 @@ fn main() -> ! {
         clocks,
         &mut rcc.apb2,
     );
+
+    let buffer: &'static mut [u8; 128 * 128 * 2] = singleton!(: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2]).unwrap();
     
-    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
+    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc, buffer).into();
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 

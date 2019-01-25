@@ -4,7 +4,7 @@
 #![no_main]
 #![no_std]
 
-#[macro_use(entry, exception)]
+#[macro_use(entry)]
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate panic_semihosting;
@@ -15,11 +15,9 @@ extern crate embedded_graphics;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
-use rt::ExceptionFrame;
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use ssd1351::prelude::*;
-use ssd1351::properties::DisplayRotation;
 use hal::delay::Delay;
 
 use embedded_graphics::prelude::*;

@@ -12,29 +12,44 @@ where
     DI: DisplayInterface,
 {
     display: Display<DI>,
+    #[cfg(feature = "buffered")]
+    pub buffer: &'static mut [u8],
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
+    #[cfg(not(feature = "buffered"))]
     /// Create new GraphicsMode instance
     fn new(display: Display<DI>) -> Self {
         GraphicsMode { display }
     }
 
+    #[cfg(feature = "buffered")]
+    fn new(display: Display<DI>, buffer: &'static mut [u8]) -> Self {
+        GraphicsMode { display, buffer }
+    }
+
+    #[cfg(not(feature = "buffered"))]
     /// Release all resources used by GraphicsMode
     fn release(self) -> Display<DI> {
         self.display
     }
-}
 
-impl<DI: DisplayInterface> GraphicsMode<DI> {
-    /// Create a new grahpics display interface
-    pub fn new(display: Display<DI>) -> Self {
-        GraphicsMode { display }
+    #[cfg(feature = "buffered")]
+    /// Release all resources used by GraphicsMode
+    fn release(self) -> (Display<DI>, &'static mut [u8]) {
+        (self.display, self.buffer)
     }
 }
+
+// impl<DI: DisplayInterface> GraphicsMode<DI> {
+//     /// Create a new grahpics display interface
+//     pub fn new(display: Display<DI>) -> Self {
+//         GraphicsMode { display }
+//     }
+// }
 
 impl<DI> GraphicsMode<DI>
 where
