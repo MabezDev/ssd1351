@@ -63,9 +63,12 @@ where
 
     #[cfg(feature = "buffered")]
     /// Clear the display
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self, flush: bool) {
         for i in 0..self.buffer.len() {
             self.buffer[i] = 0u8;
+        }
+        if flush {
+            self.flush();
         }
     }
 
