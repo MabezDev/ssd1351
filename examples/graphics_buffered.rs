@@ -4,7 +4,6 @@
 #![no_main]
 #![no_std]
 
-#[macro_use(entry, exception)]
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate panic_semihosting;
@@ -16,7 +15,7 @@ extern crate embedded_graphics;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
-use rt::ExceptionFrame;
+use rt::entry;
 use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
@@ -66,7 +65,6 @@ fn main() -> ! {
         (sck, miso, mosi),
         MODE,
         1.mhz(),
-        // 100.khz(),
         clocks,
         &mut rcc.apb2,
     );

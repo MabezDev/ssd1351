@@ -9,7 +9,7 @@ pub struct DisplayMode<MODE>(pub MODE);
 /// Trait with core functionality for display mode switching
 pub trait DisplayModeTrait<DI> {
     /// Allocate all required data and initialise display for mode
-    fn new(properties: Display<DI>) -> Self;
+    fn new(display: Display<DI>) -> Self;
 
     /// Release resources for reuse with different mode
     fn release(self) -> Display<DI>;
@@ -17,12 +17,12 @@ pub trait DisplayModeTrait<DI> {
 
 impl<MODE> DisplayMode<MODE> {
     /// Setup display to run in requested mode
-    pub fn new<DI>(properties: Display<DI>) -> Self
+    pub fn new<DI>(display: Display<DI>) -> Self
     where
         DI: DisplayInterface,
         MODE: DisplayModeTrait<DI>,
     {
-        DisplayMode(MODE::new(properties))
+        DisplayMode(MODE::new(display))
     }
 
     /// Change into any mode implementing DisplayModeTrait
@@ -32,7 +32,7 @@ impl<MODE> DisplayMode<MODE> {
         DI: DisplayInterface,
         MODE: DisplayModeTrait<DI>,
     {
-        let properties = self.0.release();
-        NMODE::new(properties)
+        let display = self.0.release();
+        NMODE::new(display)
     }
 }
