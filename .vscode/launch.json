@@ -13,7 +13,7 @@
             "debugger_args": [
                 "-nx" // dont use the .gdbinit file
             ],
-            "executable": "./target/thumbv7em-none-eabi/debug/examples/helloworld",
+            "executable": "./target/thumbv7em-none-eabi/debug/examples/graphics_buffered",
             "remote": true,
             "target": ":3333",
             "cwd": "${workspaceRoot}",
@@ -34,7 +34,7 @@
             "debugger_args": [
                 "-nx" // dont use the .gdbinit file
             ],
-            "executable": "./target/thumbv7em-none-eabi/release/examples/helloworld",
+            "executable": "./target/thumbv7em-none-eabi/release/examples/graphics_buffered",
             "remote": true,
             "target": ":3333",
             "cwd": "${workspaceRoot}",

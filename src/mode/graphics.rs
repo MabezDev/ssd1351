@@ -12,37 +12,64 @@ where
     DI: DisplayInterface,
 {
     display: Display<DI>,
+    #[cfg(feature = "buffered")]
+    pub buffer: &'static mut [u8],
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
+    #[cfg(not(feature = "buffered"))]
     /// Create new GraphicsMode instance
     fn new(display: Display<DI>) -> Self {
         GraphicsMode { display }
     }
 
+    #[cfg(feature = "buffered")]
+    fn new(display: Display<DI>, buffer: &'static mut [u8]) -> Self {
+        GraphicsMode { display, buffer }
+    }
+
+    #[cfg(not(feature = "buffered"))]
     /// Release all resources used by GraphicsMode
     fn release(self) -> Display<DI> {
         self.display
     }
-}
 
-impl<DI: DisplayInterface> GraphicsMode<DI> {
-    /// Create a new grahpics display interface
-    pub fn new(display: Display<DI>) -> Self {
-        GraphicsMode { display }
+    #[cfg(feature = "buffered")]
+    /// Release all resources used by GraphicsMode
+    fn release(self) -> (Display<DI>, &'static mut [u8]) {
+        (self.display, self.buffer)
     }
 }
+
+// impl<DI: DisplayInterface> GraphicsMode<DI> {
+//     /// Create a new grahpics display interface
+//     pub fn new(display: Display<DI>) -> Self {
+//         GraphicsMode { display }
+//     }
+// }
 
 impl<DI> GraphicsMode<DI>
 where
     DI: DisplayInterface,
 {
+    #[cfg(not(feature = "buffered"))]
     /// Clear the display
     pub fn clear(&mut self) {
         self.display.clear().unwrap();
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Clear the display
+    pub fn clear(&mut self, flush: bool) {
+        for i in 0..self.buffer.len() {
+            self.buffer[i] = 0u8;
+        }
+        if flush {
+            self.flush();
+        }
     }
 
     /// Reset display
@@ -58,6 +85,7 @@ where
         rst.set_high();
     }
 
+    #[cfg(not(feature = "buffered"))]
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
@@ -69,6 +97,27 @@ where
         };
         self.display.set_draw_area((nx as u8, ny as u8), (display_width, display_height)).unwrap();
         self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
+    /// coordinates are out of the bounds of the display, this method call is a noop.
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
+        let rot = self.display.get_rotation();
+        let (nx, ny) = match rot {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
+        };
+        // set bytes in buffer
+        self.buffer[(ny as usize * 128usize + nx as usize) * 2] = (color >> 8) as u8;
+        self.buffer[((ny as usize * 128usize + nx as usize) * 2) + 1usize ] = color as u8;
+    }
+
+    #[cfg(feature = "buffered")]
+    pub fn flush(&mut self) {
+         let (display_width, display_height) = self.display.get_size().dimensions();
+        self.display.set_draw_area((0, 0), (display_width, display_height)).unwrap();
+        self.display.draw(self.buffer).unwrap();
     }
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from

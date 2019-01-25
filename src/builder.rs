@@ -11,7 +11,7 @@ use super::mode::displaymode::DisplayMode;
 use super::mode::raw::RawMode;
 
 /// Builder struct. Driver options and interface are set using its methods.
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Builder {
     display_size: DisplaySize,
     rotation: DisplayRotation,
@@ -47,6 +47,25 @@ impl Builder {
         Self { rotation, ..*self }
     }
 
+    #[cfg(feature = "buffered")]
+    /// Finish the builder and use SPI to communicate with the display
+    pub fn connect_spi<SPI, DC>(
+        &self,
+        spi: SPI,
+        dc: DC,
+        buffer: &'static mut [u8],
+    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    where
+        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        DC: OutputPin,
+    {
+        assert_eq!(buffer.len(), 128 * 128 * 2);
+        let properties =
+            Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, buffer)
+    }
+
+    #[cfg(not(feature = "buffered"))]
     /// Finish the builder and use SPI to communicate with the display
     pub fn connect_spi<SPI, DC>(
         &self,

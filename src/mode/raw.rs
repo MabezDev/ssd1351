@@ -15,6 +15,8 @@ where
     DI: DisplayInterface,
 {
     pub display: Display<DI>,
+    #[cfg(feature = "buffered")]
+    pub buffer: &'static mut [u8],
 }
 
 impl<DI> DisplayModeTrait<DI> for RawMode<DI>
@@ -22,19 +24,32 @@ where
     DI: DisplayInterface,
 {
     /// Create new RawMode instance
+    #[cfg(not(feature = "buffered"))]
     fn new(display: Display<DI>) -> Self {
         RawMode { display }
     }
 
+    #[cfg(feature = "buffered")]
+    fn new(display: Display<DI>, buffer: &'static mut [u8]) -> Self {
+        RawMode { display, buffer }
+    }
+
+    #[cfg(not(feature = "buffered"))]
     /// Release all resources used by RawMode
-    fn release(self) -> Display<DI> {
+    fn release(self) -> (Display<DI>) {
         self.display
+    }
+
+    #[cfg(feature = "buffered")]
+    /// Release all resources used by RawMode
+    fn release(self) -> (Display<DI>, &'static mut [u8]) {
+        (self.display, self.buffer)
     }
 }
 
-impl<DI: DisplayInterface> RawMode<DI> {
-    /// Create a new raw display mode
-    pub fn new(display: Display<DI>) -> Self {
-        RawMode { display }
-    }
-}
+// impl<DI: DisplayInterface> RawMode<DI> {
+//     /// Create a new raw display mode
+//     pub fn new(display: Display<DI>) -> Self {
+//         RawMode { display }
+//     }
+// }
