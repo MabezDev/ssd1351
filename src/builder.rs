@@ -64,4 +64,20 @@ impl Builder {
         DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, buffer)
     }
 
+    #[cfg(not(feature = "buffered"))]
+    /// Finish the builder and use SPI to communicate with the display
+    pub fn connect_spi<SPI, DC>(
+        &self,
+        spi: SPI,
+        dc: DC,
+    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    where
+        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        DC: OutputPin,
+    {
+        let properties =
+            Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+    }
+
 }

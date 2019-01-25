@@ -1,6 +1,3 @@
-//! Interfacing the on-board L3GD20 (gyroscope)
-#![deny(unsafe_code)]
-// #![deny(warnings)]
 #![no_main]
 #![no_std]
 
@@ -20,16 +17,18 @@ use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
-use cortex_m::singleton;
+// use cortex_m::singleton;
 
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::primitives::{Circle, Line, Rect};
 
 /// SPI mode
 pub const MODE: Mode = Mode {
     phase: Phase::CaptureOnFirstTransition,
     polarity: Polarity::IdleLow,
 };
+
+static mut BUFFER : [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2];
 
 #[entry]
 fn main() -> ! {
@@ -65,19 +64,25 @@ fn main() -> ! {
         p.SPI1,
         (sck, miso, mosi),
         MODE,
-        1.mhz(),
+        16.mhz(),
         clocks,
         &mut rcc.apb2,
     );
 
-    let buffer: &'static mut [u8; 128 * 128 * 2] = singleton!(: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2]).unwrap();
+    // this hard faults - use unsafe for now
+    // let buffer: &'static mut [u8; 128 * 128 * 2] = singleton!(: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2]).unwrap();
     
-    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc, buffer).into();
+    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc, unsafe { &mut BUFFER }).into();
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
-
-    loop {}
+    // display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
+    // display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
+    loop {
+        display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xF1FA_u16.into())).into_iter());
+        display.flush();
+        display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xFFFF_u16.into())).into_iter());
+        display.flush();
+    }
+    
 }
