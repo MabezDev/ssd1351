@@ -1,3 +1,7 @@
+
+#[cfg(feature = "fb-checksum")]
+extern crate crc;
+
 use interface::DisplayInterface;
 use display::Display;
 use hal::blocking::delay::DelayMs;
@@ -5,6 +9,9 @@ use hal::digital::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
 use properties::DisplayRotation;
+
+#[cfg(feature = "fb-checksum")]
+use self::crc::crc32::{IEEE_TABLE, update as crc32_update};
 
 /// Graphics Mode for the display
 pub struct GraphicsMode<DI>
@@ -14,6 +21,8 @@ where
     display: Display<DI>,
     #[cfg(feature = "buffered")]
     pub buffer: &'static mut [u8],
+    #[cfg(feature = "fb-checksum")]
+    cs: u32
 }
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
@@ -28,7 +37,12 @@ where
 
     #[cfg(feature = "buffered")]
     fn new(display: Display<DI>, buffer: &'static mut [u8]) -> Self {
-        GraphicsMode { display, buffer }
+        GraphicsMode { 
+            display: display, 
+            buffer: buffer,
+            #[cfg(feature = "fb-checksum")]
+            cs: 0,
+        }
     }
 
     #[cfg(not(feature = "buffered"))]
@@ -72,6 +86,12 @@ where
         }
     }
 
+    #[cfg(feature = "buffered")]
+    /// Clear the display
+    pub fn fb(&self) -> &[u8] {
+        self.buffer
+    }
+
     /// Reset display
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
     where
@@ -109,8 +129,19 @@ where
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
         };
         // set bytes in buffer
-        self.buffer[(ny as usize * 128usize + nx as usize) * 2] = (color >> 8) as u8;
-        self.buffer[((ny as usize * 128usize + nx as usize) * 2) + 1usize ] = color as u8;
+        let idx = (ny as usize * 128usize + nx as usize) * 2;
+        self.buffer[idx] = (color >> 8) as u8;
+        self.buffer[idx + 1usize ] = color as u8;
+        #[cfg(feature = "fb-checksum")]
+        {
+            self.cs = crc32_update(self.cs, &IEEE_TABLE, &self.buffer[idx..idx+1]);
+        }
+    }
+
+    #[cfg(feature = "fb-checksum")]
+    /// Returns the current CRC of the buffer
+    pub fn cs(&self) -> u32 {
+        self.cs
     }
 
     #[cfg(feature = "buffered")]
