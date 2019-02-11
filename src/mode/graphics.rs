@@ -85,6 +85,12 @@ where
         rst.set_high();
     }
 
+    #[cfg(feature = "buffered")]
+    /// Access the framebuffer
+    pub fn fb(&self) -> &[u8] {
+        self.buffer
+    }
+
     #[cfg(not(feature = "buffered"))]
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
