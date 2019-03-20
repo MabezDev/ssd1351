@@ -90,7 +90,7 @@ fn main() -> ! {
         date = rtc.get_date();
         {
             write!(buffer, "{:02}:{:02}:{:02}", time.hours, time.minutes, time.seconds).unwrap();
-            display.draw(Font12x16::render_str(buffer.as_str()).with_stroke(Some(0xF818_u16.into())).translate(Coord::new(10, 40)).into_iter());
+            display.draw(Font12x16::render_str(buffer.as_str()).with_stroke(Some(0xF818_u16.into())).translate(Coord::new(10, -10)).into_iter());
             buffer.clear(); // reset the buffer
             write!(buffer, "{:02}:{:02}:{:04}", date.date, date.month, date.year).unwrap();
             display.draw(Font6x12::render_str(buffer.as_str()).with_stroke(Some(0x880B_u16.into())).translate(Coord::new(24, 60)).into_iter());

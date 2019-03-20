@@ -166,7 +166,7 @@ impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI>
     {
         let (width, height) = self.display.get_size().dimensions();
         for drawable::Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            if x <= width.into() && y <= height.into() {
+            if x < width.into() && y < height.into() {
                 self.set_pixel(x, y, color.into_inner());
             }
         }

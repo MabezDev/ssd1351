@@ -17,10 +17,10 @@ use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use hal::delay::Delay;
-// use cortex_m::singleton;
 
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Rect};
+use embedded_graphics::fonts::Font6x12;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -79,9 +79,13 @@ fn main() -> ! {
     // display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
     // display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
     loop {
-        display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xF1FA_u16.into())).into_iter());
-        display.flush();
         display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xFFFF_u16.into())).into_iter());
+        display.flush();
+        
+        display.draw(Font6x12::render_str("Testing string")
+            .with_stroke(Some(0xF1FA_u16.into()))
+            .translate(Coord::new(0, -24))
+            .into_iter());
         display.flush();
     }
     
