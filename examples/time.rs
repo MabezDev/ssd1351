@@ -4,7 +4,7 @@
 #![no_main]
 #![no_std]
 
-#[macro_use(entry, exception)]
+#[macro_use(entry)]
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate panic_semihosting;
@@ -16,7 +16,6 @@ extern crate heapless;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
-use rt::ExceptionFrame;
 use ssd1351::builder::Builder;
 use ssd1351::mode::{GraphicsMode};
 use ssd1351::prelude::*;
@@ -80,7 +79,7 @@ fn main() -> ! {
     rtc.set_date(&date);
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.reset(&mut rst, &mut delay);
+    display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
 
     // let mut buffer: [u8; 256] = [0; 256];

@@ -1,7 +1,7 @@
 //! Interface factory
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use super::properties::DisplayRotation;
 use super::properties::DisplaySize;
@@ -49,7 +49,7 @@ impl Builder {
 
     #[cfg(feature = "buffered")]
     /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
+    pub fn connect_spi<SPI, DC, PinE>(
         &self,
         spi: SPI,
         dc: DC,
@@ -57,7 +57,7 @@ impl Builder {
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-        DC: OutputPin,
+        DC: OutputPin<Error = PinE>,
     {
         assert_eq!(buffer.len(), 128 * 128 * 2);
         let properties =
@@ -67,14 +67,14 @@ impl Builder {
 
     #[cfg(not(feature = "buffered"))]
     /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
+    pub fn connect_spi<SPI, DC, PinE>(
         &self,
         spi: SPI,
         dc: DC,
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
-        DC: OutputPin,
+        DC: OutputPin<Error = PinE>,
     {
         let properties =
             Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);

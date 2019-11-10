@@ -1,7 +1,7 @@
 use interface::DisplayInterface;
 use display::Display;
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use mode::displaymode::DisplayModeTrait;
 use properties::DisplayRotation;
@@ -44,13 +44,6 @@ where
     }
 }
 
-// impl<DI: DisplayInterface> GraphicsMode<DI> {
-//     /// Create a new grahpics display interface
-//     pub fn new(display: Display<DI>) -> Self {
-//         GraphicsMode { display }
-//     }
-// }
-
 impl<DI> GraphicsMode<DI>
 where
     DI: DisplayInterface,
@@ -73,16 +66,18 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), ()>
     where
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        rst.set_high().map_err(|_| ())?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low().map_err(|_| ())?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high().map_err(|_| ())?;
+
+        Ok(())
     }
 
     #[cfg(feature = "buffered")]

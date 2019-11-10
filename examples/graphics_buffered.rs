@@ -73,7 +73,7 @@ fn main() -> ! {
     // let buffer: &'static mut [u8; 128 * 128 * 2] = singleton!(: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2]).unwrap();
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc, unsafe { &mut BUFFER }).into();
-    display.reset(&mut rst, &mut delay);
+    display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
 
     // display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());

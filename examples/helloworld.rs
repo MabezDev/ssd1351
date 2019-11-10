@@ -67,7 +67,7 @@ fn main() -> ! {
     
     
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.reset(&mut rst, &mut delay);
+    display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
 
     let i: u16 = 0xFFFF;

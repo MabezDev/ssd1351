@@ -1,7 +1,7 @@
 //! SSD1351 SPI interface
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
 use super::DisplayInterface;
 
@@ -14,10 +14,10 @@ pub struct SpiInterface<SPI, DC> {
     dc: DC,
 }
 
-impl<SPI, DC> SpiInterface<SPI, DC>
+impl<SPI, DC, PinE> SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
-    DC: OutputPin,
+    DC: OutputPin<Error = PinE>,
 {
     /// Create new SPI interface for communciation with SSD1351
     pub fn new(spi: SPI, dc: DC) -> Self {
@@ -25,23 +25,23 @@ where
     }
 }
 
-impl<SPI, DC> DisplayInterface for SpiInterface<SPI, DC>
+impl<SPI, DC, PinE> DisplayInterface for SpiInterface<SPI, DC>
 where
     SPI: hal::blocking::spi::Write<u8>,
-    DC: OutputPin,
+    DC: OutputPin<Error = PinE>,
 {
     fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
-        self.dc.set_low();
+        self.dc.set_low().map_err(|_| ())?;
 
         self.spi.write(&[cmd]).map_err(|_| ())?;
 
-        self.dc.set_high();
+        self.dc.set_high().map_err(|_| ())?;
         Ok(())
     }
 
     fn send_data(&mut self, buf: &[u8]) -> Result<(), ()> {
         // 1 = data, 0 = command
-        self.dc.set_high();
+        self.dc.set_high().map_err(|_| ())?;
 
         self.spi.write(&buf).map_err(|_| ())?;
 
