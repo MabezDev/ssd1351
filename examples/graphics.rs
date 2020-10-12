@@ -7,23 +7,25 @@
 #[macro_use(entry, exception)]
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
-extern crate panic_semihosting;
-extern crate embedded_hal as ehal;
-extern crate stm32l4xx_hal as hal;
-extern crate ssd1351;
 extern crate embedded_graphics;
+extern crate embedded_hal as ehal;
+extern crate panic_semihosting;
+extern crate ssd1351;
+extern crate stm32l4xx_hal as hal;
 
+use ehal::spi::{Mode, Phase, Polarity};
+use hal::delay::Delay;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
-use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
-use ssd1351::mode::{GraphicsMode};
-use hal::delay::Delay;
+use ssd1351::mode::GraphicsMode;
 
+use embedded_graphics::pixelcolor::raw::RawU16;
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::{Circle, Line};
+use embedded_graphics::style::PrimitiveStyle;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -40,7 +42,12 @@ fn main() -> ! {
 
     // TRY the other clock configuration
     // let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let clocks = rcc.cfgr.sysclk(80.mhz()).pclk1(80.mhz()).pclk2(80.mhz()).freeze(&mut flash.acr);
+    let clocks = rcc
+        .cfgr
+        .sysclk(80.mhz())
+        .pclk1(80.mhz())
+        .pclk2(80.mhz())
+        .freeze(&mut flash.acr);
     // let clocks = rcc.cfgr.sysclk(64.mhz()).pclk1(32.mhz()).freeze(&mut flash.acr);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
@@ -70,13 +77,25 @@ fn main() -> ! {
         clocks,
         &mut rcc.apb2,
     );
-    
+
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.reset(&mut rst, &mut delay);
+    display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
 
-    display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
-    display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
+    Line::new(Point::new(0, 0), Point::new(74, 74))
+        .into_styled(PrimitiveStyle::with_stroke(
+            RawU16::new(0x0D85_u16).into(),
+            1,
+        ))
+        .draw(&mut display)
+        .unwrap();
+    Circle::new(Point::new(64, 64), 8)
+        .into_styled(PrimitiveStyle::with_stroke(
+            RawU16::new(0xF1FA_u16).into(),
+            1,
+        ))
+        .draw(&mut display)
+        .unwrap();
 
     loop {}
 }

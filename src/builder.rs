@@ -1,14 +1,14 @@
 //! Interface factory
 
 use hal;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
 
-use super::properties::DisplayRotation;
-use super::properties::DisplaySize;
-use super::interface::{SpiInterface};
 use super::display::Display;
+use super::interface::SpiInterface;
 use super::mode::displaymode::DisplayMode;
 use super::mode::raw::RawMode;
+use super::properties::DisplayRotation;
+use super::properties::DisplaySize;
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone)]
@@ -28,7 +28,7 @@ impl Builder {
     pub fn new() -> Self {
         Self {
             display_size: DisplaySize::Display128x128,
-            rotation: DisplayRotation::Rotate0
+            rotation: DisplayRotation::Rotate0,
         }
     }
 
@@ -60,8 +60,7 @@ impl Builder {
         DC: OutputPin,
     {
         assert_eq!(buffer.len(), 128 * 128 * 2);
-        let properties =
-            Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        let properties = Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
         DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, buffer)
     }
 
@@ -76,9 +75,7 @@ impl Builder {
         SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
         DC: OutputPin,
     {
-        let properties =
-            Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
+        let properties = Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
         DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
     }
-
 }

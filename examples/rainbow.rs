@@ -7,24 +7,24 @@
 #[macro_use(entry, exception)]
 extern crate cortex_m_rt as rt;
 extern crate cortex_m;
-extern crate panic_semihosting;
-extern crate stm32l4xx_hal as hal;
-extern crate ssd1351;
 extern crate embedded_graphics;
+extern crate panic_semihosting;
+extern crate ssd1351;
+extern crate stm32l4xx_hal as hal;
 
+use hal::delay::Delay;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::ExceptionFrame;
 use ssd1351::builder::Builder;
-use ssd1351::mode::{GraphicsMode};
+use ssd1351::mode::GraphicsMode;
 use ssd1351::prelude::*;
-use hal::delay::Delay;
 
+use embedded_graphics::fonts::{Font12x16, Text};
+use embedded_graphics::pixelcolor::Rgb565;
 use embedded_graphics::prelude::*;
-use embedded_graphics::fonts::Font12x16;
-
-
+use embedded_graphics::style::TextStyle;
 
 #[entry]
 fn main() -> ! {
@@ -35,7 +35,12 @@ fn main() -> ! {
 
     // TRY the other clock configuration
     // let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let clocks = rcc.cfgr.sysclk(80.mhz()).pclk1(80.mhz()).pclk2(80.mhz()).freeze(&mut flash.acr);
+    let clocks = rcc
+        .cfgr
+        .sysclk(80.mhz())
+        .pclk1(80.mhz())
+        .pclk2(80.mhz())
+        .freeze(&mut flash.acr);
     // let clocks = rcc.cfgr.sysclk(64.mhz()).pclk1(32.mhz()).freeze(&mut flash.acr);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
@@ -65,18 +70,25 @@ fn main() -> ! {
         &mut rcc.apb2,
     );
 
-    
-    
     let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc).into();
-    display.reset(&mut rst, &mut delay);
+    display.reset(&mut rst, &mut delay).unwrap();
     display.init().unwrap();
 
-    let mut hsl = HSL { h: 0.0 , s: 0.8 , l: 0.5 };
+    let mut hsl = HSL {
+        h: 0.0,
+        s: 0.8,
+        l: 0.5,
+    };
     loop {
         let (r, g, b) = hsl.to_rgb();
-        let color: u16 = (r as u16) << 11 | (g as u16) << 5 | b as u16;
-        display.draw(Font12x16::render_str("Hello").with_stroke(Some(color.into())).into_iter());
-        display.draw(Font12x16::render_str("World").with_stroke(Some(color.into())).translate(Coord::new(0, 18)).into_iter());
+        Text::new("Hello", Point::zero())
+            .into_styled(TextStyle::new(Font12x16, Rgb565::new(r, g, b)))
+            .draw(&mut display)
+            .unwrap();
+        Text::new("World", Point::new(0, 18))
+            .into_styled(TextStyle::new(Font12x16, Rgb565::new(r, g, b)))
+            .draw(&mut display)
+            .unwrap();
         hsl.h += 1.0;
         if hsl.h == 360.0 {
             hsl.h = 0.0;
@@ -125,10 +137,12 @@ impl HSL {
         };
         let p = 2.0 * l - q;
 
-        (percent_to_byte(hue_to_rgb(p, q, h + 1.0 / 3.0)),
-         percent_to_byte(hue_to_rgb(p, q, h)),
-         percent_to_byte(hue_to_rgb(p, q, h - 1.0 / 3.0)))
-    }   
+        (
+            percent_to_byte(hue_to_rgb(p, q, h + 1.0 / 3.0)),
+            percent_to_byte(hue_to_rgb(p, q, h)),
+            percent_to_byte(hue_to_rgb(p, q, h - 1.0 / 3.0)),
+        )
+    }
 }
 
 fn percent_to_byte(percent: f64) -> u8 {

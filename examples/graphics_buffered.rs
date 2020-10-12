@@ -1,26 +1,28 @@
 #![no_main]
 #![no_std]
 
-extern crate cortex_m_rt as rt;
 extern crate cortex_m;
-extern crate panic_semihosting;
-extern crate embedded_hal as ehal;
-extern crate stm32l4xx_hal as hal;
-extern crate ssd1351;
+extern crate cortex_m_rt as rt;
 extern crate embedded_graphics;
+extern crate embedded_hal as ehal;
+extern crate panic_semihosting;
+extern crate ssd1351;
+extern crate stm32l4xx_hal as hal;
 
+use ehal::spi::{Mode, Phase, Polarity};
+use hal::delay::Delay;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
 use rt::entry;
-use ehal::spi::{Mode, Phase, Polarity};
 use ssd1351::builder::Builder;
-use ssd1351::mode::{GraphicsMode};
-use hal::delay::Delay;
+use ssd1351::mode::GraphicsMode;
 // use cortex_m::singleton;
 
+use embedded_graphics::pixelcolor::raw::RawU16;
 use embedded_graphics::prelude::*;
-use embedded_graphics::primitives::{Rect};
+use embedded_graphics::primitives::Rectangle;
+use embedded_graphics::style::PrimitiveStyle;
 
 /// SPI mode
 pub const MODE: Mode = Mode {
@@ -28,7 +30,7 @@ pub const MODE: Mode = Mode {
     polarity: Polarity::IdleLow,
 };
 
-static mut BUFFER : [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2];
+static mut BUFFER: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2];
 
 #[entry]
 fn main() -> ! {
@@ -39,7 +41,12 @@ fn main() -> ! {
 
     // TRY the other clock configuration
     // let clocks = rcc.cfgr.freeze(&mut flash.acr);
-    let clocks = rcc.cfgr.sysclk(80.mhz()).pclk1(80.mhz()).pclk2(80.mhz()).freeze(&mut flash.acr);
+    let clocks = rcc
+        .cfgr
+        .sysclk(80.mhz())
+        .pclk1(80.mhz())
+        .pclk2(80.mhz())
+        .freeze(&mut flash.acr);
     // let clocks = rcc.cfgr.sysclk(64.mhz()).pclk1(32.mhz()).freeze(&mut flash.acr);
 
     let mut gpioa = p.GPIOA.split(&mut rcc.ahb2);
@@ -71,18 +78,21 @@ fn main() -> ! {
 
     // this hard faults - use unsafe for now
     // let buffer: &'static mut [u8; 128 * 128 * 2] = singleton!(: [u8; 128 * 128 * 2] = [0u8; 128 * 128 * 2]).unwrap();
-    
-    let mut display: GraphicsMode<_> = Builder::new().connect_spi(spi, dc, unsafe { &mut BUFFER }).into();
+
+    let mut display: GraphicsMode<_> = Builder::new()
+        .connect_spi(spi, dc, unsafe { &mut BUFFER })
+        .into();
     display.reset(&mut rst, &mut delay);
     display.init().unwrap();
 
-    // display.draw(Line::new(Coord::new(0, 0), Coord::new(74, 74)).with_stroke(Some(0x0D85_u16.into())).into_iter());
-    // display.draw(Circle::new(Coord::new(64, 64), 8).with_stroke(Some(0xF1FA_u16.into())).into_iter());
     loop {
-        display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xF1FA_u16.into())).into_iter());
+        Rectangle::new(Point::new(0, 0), Point::new(127, 127))
+            .into_styled(PrimitiveStyle::with_fill(RawU16::new(0xF1FA_u16).into()))
+            .draw(&mut display);
         display.flush();
-        display.draw(Rect::new(Coord::new(0,0), Coord::new(127, 127)).with_fill(Some(0xFFFF_u16.into())).into_iter());
+        Rectangle::new(Point::new(0, 0), Point::new(127, 127))
+            .into_styled(PrimitiveStyle::with_fill(RawU16::new(0xFFFF_u16).into()))
+            .draw(&mut display);
         display.flush();
     }
-    
 }

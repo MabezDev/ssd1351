@@ -4,8 +4,8 @@
 //! builder. Used as a source to coerce the driver into richer modes like
 //! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../terminal/index.html).
 
-use interface::DisplayInterface;
 use display::Display;
+use interface::DisplayInterface;
 
 use mode::displaymode::DisplayModeTrait;
 
@@ -36,7 +36,7 @@ where
 
     #[cfg(not(feature = "buffered"))]
     /// Release all resources used by RawMode
-    fn release(self) -> (Display<DI>) {
+    fn release(self) -> Display<DI> {
         self.display
     }
 
