@@ -1,10 +1,10 @@
-use display::Display;
+use crate::display::Display;
 use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
-use interface::DisplayInterface;
+use crate::interface::DisplayInterface;
 
-use mode::displaymode::DisplayModeTrait;
-use properties::DisplayRotation;
+use crate::mode::displaymode::DisplayModeTrait;
+use crate::properties::DisplayRotation;
 
 /// Graphics Mode for the display
 pub struct GraphicsMode<DI>

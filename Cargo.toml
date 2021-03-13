@@ -4,6 +4,7 @@ version = "0.3.0"
 authors = ["Scott Mabin <mabez123@gmail.com>"]
 description = "Driver crate for the SSD1351 16bit colour OLED display driver."
 keywords = ["no-std", "ssd1351", "oled", "embedded", "embedded-hal-driver"]
+edition = "2018"
 repository = "https://github.com/MabezDev/ssd1351"
 readme = "README.md"
 license = "MIT OR Apache-2.0"

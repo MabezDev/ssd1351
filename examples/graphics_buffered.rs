@@ -94,5 +94,11 @@ fn main() -> ! {
             .into_styled(PrimitiveStyle::with_fill(RawU16::new(0xFFFF_u16).into()))
             .draw(&mut display);
         display.flush();
+
+        display.draw(Font6x12::render_str("Testing string")
+            .with_stroke(Some(0xF1FA_u16.into()))
+            .translate(Coord::new(0, -24))
+            .into_iter());
+        display.flush();
     }
 }

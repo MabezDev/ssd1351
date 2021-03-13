@@ -1,11 +1,7 @@
-//! Interfacing the on-board L3GD20 (gyroscope)
 #![deny(unsafe_code)]
-// #![deny(warnings)]
 #![no_main]
 #![no_std]
 
-#[macro_use(entry, exception)]
-extern crate cortex_m_rt as rt;
 extern crate cortex_m;
 extern crate embedded_graphics;
 extern crate embedded_hal as ehal;
@@ -18,7 +14,7 @@ use hal::delay::Delay;
 use hal::prelude::*;
 use hal::spi::Spi;
 use hal::stm32l4::stm32l4x2;
-use rt::ExceptionFrame;
+use cortex_m_rt::{entry, ExceptionFrame};
 use ssd1351::builder::Builder;
 use ssd1351::mode::GraphicsMode;
 

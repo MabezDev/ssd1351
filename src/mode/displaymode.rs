@@ -1,7 +1,7 @@
 //! Abstraction of different operating modes for the SSD1351
 
-use display::Display;
-use interface::DisplayInterface;
+use crate::display::Display;
+use crate::interface::DisplayInterface;
 
 /// Display abstraction
 pub struct DisplayMode<MODE> {

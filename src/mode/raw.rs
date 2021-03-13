@@ -4,10 +4,10 @@
 //! builder. Used as a source to coerce the driver into richer modes like
 //! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../terminal/index.html).
 
-use display::Display;
-use interface::DisplayInterface;
+use crate::display::Display;
+use crate::interface::DisplayInterface;
 
-use mode::displaymode::DisplayModeTrait;
+use crate::mode::displaymode::DisplayModeTrait;
 
 /// Raw display mode
 pub struct RawMode<DI>
