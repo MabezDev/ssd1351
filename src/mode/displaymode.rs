@@ -1,21 +1,21 @@
 //! Abstraction of different operating modes for the SSD1351
 
-use interface::DisplayInterface;
-use display::Display;
+use crate::display::Display;
+use crate::interface::DisplayInterface;
 
-/// Display display abstraction
-pub struct DisplayMode<MODE>{
-    pub display: MODE
+/// Display abstraction
+pub struct DisplayMode<MODE> {
+    pub display: MODE,
 }
 
-/// Trait with core functionality for display display switching
+/// Trait with core functionality for display switching
 pub trait DisplayModeTrait<DI> {
     /// Allocate all required data and initialise display for display
     #[cfg(not(feature = "buffered"))]
     fn new(display: Display<DI>) -> Self;
 
     #[cfg(feature = "buffered")]
-    fn new(display: Display<DI>, &'static mut [u8]) -> Self;
+    fn new(display: Display<DI>, buffer: &'static mut [u8]) -> Self;
 
     /// Release resources for reuse with different display
     #[cfg(not(feature = "buffered"))]
@@ -33,8 +33,8 @@ impl<MODE> DisplayMode<MODE> {
         DI: DisplayInterface,
         MODE: DisplayModeTrait<DI>,
     {
-        DisplayMode{
-            display: MODE::new(display)
+        DisplayMode {
+            display: MODE::new(display),
         }
     }
 
@@ -45,7 +45,7 @@ impl<MODE> DisplayMode<MODE> {
         MODE: DisplayModeTrait<DI>,
     {
         DisplayMode {
-            display: MODE::new(display, buffer)
+            display: MODE::new(display, buffer),
         }
     }
 

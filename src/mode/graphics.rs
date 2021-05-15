@@ -1,10 +1,10 @@
-use interface::DisplayInterface;
-use display::Display;
+use crate::display::Display;
 use hal::blocking::delay::DelayMs;
-use hal::digital::OutputPin;
+use hal::digital::v2::OutputPin;
+use crate::interface::DisplayInterface;
 
-use mode::displaymode::DisplayModeTrait;
-use properties::DisplayRotation;
+use crate::mode::displaymode::DisplayModeTrait;
+use crate::properties::DisplayRotation;
 
 /// Graphics Mode for the display
 pub struct GraphicsMode<DI>
@@ -73,16 +73,17 @@ where
     }
 
     /// Reset display
-    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY)
+    pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
     where
         RST: OutputPin,
         DELAY: DelayMs<u8>,
     {
-        rst.set_high();
+        rst.set_high()?;
         delay.delay_ms(1);
-        rst.set_low();
+        rst.set_low()?;
         delay.delay_ms(10);
-        rst.set_high();
+        rst.set_high()?;
+        Ok(())
     }
 
     #[cfg(feature = "buffered")]
@@ -101,8 +102,12 @@ where
             DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
             DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
         };
-        self.display.set_draw_area((nx as u8, ny as u8), (display_width, display_height)).unwrap();
-        self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap();
+        self.display
+            .set_draw_area((nx as u8, ny as u8), (display_width, display_height))
+            .unwrap();
+        self.display
+            .draw(&[(color >> 8) as u8, color as u8])
+            .unwrap();
     }
 
     #[cfg(feature = "buffered")]
@@ -116,13 +121,15 @@ where
         };
         // set bytes in buffer
         self.buffer[(ny as usize * 128usize + nx as usize) * 2] = (color >> 8) as u8;
-        self.buffer[((ny as usize * 128usize + nx as usize) * 2) + 1usize ] = color as u8;
+        self.buffer[((ny as usize * 128usize + nx as usize) * 2) + 1usize] = color as u8;
     }
 
     #[cfg(feature = "buffered")]
     pub fn flush(&mut self) {
-         let (display_width, display_height) = self.display.get_size().dimensions();
-        self.display.set_draw_area((0, 0), (display_width, display_height)).unwrap();
+        let (display_width, display_height) = self.display.get_size().dimensions();
+        self.display
+            .set_draw_area((0, 0), (display_width, display_height))
+            .unwrap();
         self.display.draw(self.buffer).unwrap();
     }
 
@@ -147,28 +154,35 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::drawable;
+use self::embedded_graphics::drawable::Pixel;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::Drawing;
+use self::embedded_graphics::geometry::Size;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::pixelcolor::PixelColorU16;
+use self::embedded_graphics::pixelcolor::IntoStorage;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::unsignedcoord::UnsignedCoord;
+use self::embedded_graphics::pixelcolor::Rgb565;
+#[cfg(feature = "graphics")]
+use self::embedded_graphics::DrawTarget;
 
 #[cfg(feature = "graphics")]
-impl<DI> Drawing<PixelColorU16> for GraphicsMode<DI> 
-    where
+impl<DI> DrawTarget<Rgb565> for GraphicsMode<DI>
+where
     DI: DisplayInterface,
 {
-    fn draw<T>(&mut self, item_pixels: T)
-    where
-        T: Iterator<Item = drawable::Pixel<PixelColorU16>>,
-    {
-        let (width, height) = self.display.get_size().dimensions();
-        for drawable::Pixel(UnsignedCoord(x, y), color) in item_pixels {
-            if x < width.into() && y < height.into() {
-                self.set_pixel(x, y, color.into_inner());
-            }
+    type Error = ();
+
+    fn draw_pixel(&mut self, item: Pixel<Rgb565>) -> Result<(), Self::Error> {
+        let pos = item.0;
+
+        if pos.x >= 0 && pos.y >= 0 {
+            self.set_pixel(pos.x as u32, pos.y as u32, item.1.into_storage());
         }
+
+        Ok(())
+    }
+
+    fn size(&self) -> Size {
+        let dim = self.display.get_size().dimensions();
+        Size::from((dim.0 as u32, dim.1 as u32))
     }
 }

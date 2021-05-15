@@ -1,11 +1,11 @@
 //! Container to store and set display properties
 
-use command::{Command};
+use crate::command::Command;
 
-use properties::DisplayRotation;
-use properties::DisplaySize;
+use crate::properties::DisplayRotation;
+use crate::properties::DisplaySize;
 
-use interface::DisplayInterface;
+use crate::interface::DisplayInterface;
 
 /// Display properties struct
 pub struct Display<DI> {
