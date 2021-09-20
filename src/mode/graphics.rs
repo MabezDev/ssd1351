@@ -152,35 +152,34 @@ where
 }
 
 #[cfg(feature = "graphics")]
-extern crate embedded_graphics;
+extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::drawable::Pixel;
+use self::embedded_graphics_core::Pixel;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::geometry::Size;
+use self::embedded_graphics_core::geometry::{Size, OriginDimensions};
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::pixelcolor::IntoStorage;
+use self::embedded_graphics_core::pixelcolor::{IntoStorage, Rgb565};
 #[cfg(feature = "graphics")]
-use self::embedded_graphics::pixelcolor::Rgb565;
-#[cfg(feature = "graphics")]
-use self::embedded_graphics::DrawTarget;
+use self::embedded_graphics_core::draw_target::DrawTarget;
 
 #[cfg(feature = "graphics")]
-impl<DI> DrawTarget<Rgb565> for GraphicsMode<DI>
-where
-    DI: DisplayInterface,
-{
+impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
+    type Color = Rgb565;
     type Error = ();
 
-    fn draw_pixel(&mut self, item: Pixel<Rgb565>) -> Result<(), Self::Error> {
-        let pos = item.0;
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Pixel<Self::Color>> {
+        for pixel in pixels {
+            let pos = pixel.0;
 
-        if pos.x >= 0 && pos.y >= 0 {
-            self.set_pixel(pos.x as u32, pos.y as u32, item.1.into_storage());
+            if pos.x >= 0 && pos.y >= 0 {
+                self.set_pixel(pos.x as u32, pos.y as u32, pixel.1.into_storage());
+            }
         }
-
         Ok(())
     }
+}
 
+impl<DI: DisplayInterface> OriginDimensions for GraphicsMode<DI>  {
     fn size(&self) -> Size {
         let dim = self.display.get_size().dimensions();
         Size::from((dim.0 as u32, dim.1 as u32))

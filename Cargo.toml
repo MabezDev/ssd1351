@@ -16,7 +16,7 @@ exclude = [
 ]
 
 [dependencies]
-embedded-graphics = { version = "0.6.2", optional = true }
+embedded-graphics-core = { version = "0.3.3", optional = true }
 
 [dependencies.embedded-hal]
 version = "0.2.2"
@@ -45,5 +45,5 @@ lto = true
 
 [features]
 default = ["graphics"]
-graphics = ["embedded-graphics"]
+graphics = ["embedded-graphics-core"]
 buffered = []
