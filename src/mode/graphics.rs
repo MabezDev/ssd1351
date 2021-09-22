@@ -154,13 +154,11 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::Pixel;
+use self::embedded_graphics_core::prelude::{RawData, Size, OriginDimensions, DrawTarget, Dimensions, Pixel};
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::geometry::{Size, OriginDimensions};
+use self::embedded_graphics_core::pixelcolor::Rgb565;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::pixelcolor::{IntoStorage, Rgb565};
-#[cfg(feature = "graphics")]
-use self::embedded_graphics_core::draw_target::DrawTarget;
+use self::embedded_graphics_core::pixelcolor::raw::RawU16;
 
 #[cfg(feature = "graphics")]
 impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
@@ -168,13 +166,15 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
     type Error = ();
 
     fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Pixel<Self::Color>> {
-        for pixel in pixels {
-            let pos = pixel.0;
+        let bb = self.bounding_box();
 
-            if pos.x >= 0 && pos.y >= 0 {
-                self.set_pixel(pos.x as u32, pos.y as u32, pixel.1.into_storage());
-            }
-        }
+        pixels
+            .into_iter()
+            .filter(|Pixel(pos, _)| bb.contains(*pos))
+            .for_each(|Pixel(pos, color)| {
+                self.set_pixel(pos.x as u32, pos.y as u32, RawU16::from(color).into_inner())
+            });
+
         Ok(())
     }
 }
