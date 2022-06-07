@@ -1,6 +1,6 @@
 [package]
 name = "ssd1351"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["Scott Mabin <mabez123@gmail.com>"]
 description = "Driver crate for the SSD1351 16bit colour OLED display driver."
 keywords = ["no-std", "ssd1351", "oled", "embedded", "embedded-hal-driver"]
