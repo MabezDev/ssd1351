@@ -188,9 +188,6 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
 
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Self::Color> {
         let drawable_area = area.intersection(&self.bounding_box());
-        let drawable_height = drawable_area.size.height as usize;
-        let drawable_width = drawable_area.size.width as usize;
-        let drawable_size = drawable_width * drawable_height;
 
         let rot = self.display.get_rotation();
         let sx = drawable_area.top_left.x as u8;
@@ -208,44 +205,13 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
 
         // Get an iterator of colours as u16
         // Check points for containment
-        let mut colors_iter = area
+        area
             .points()
             .zip(colors)
             .filter(|(pos, _)| drawable_area.contains(*pos))
-            .map(|(_, color)| RawU16::from(color).into_inner());
+            .map(|(_, color)| RawU16::from(color).into_inner())
+            .for_each(|color| self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap());
 
-        match rot {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => {
-                colors_iter.for_each(|color| self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap());
-            },
-
-            // These rotations are less performant due to the extra steps required for x = y
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => {
-                // Assign a temporary buffer to store values for manipulation
-                let mut color_buffer: [Option<u16>; 128*128] = [None; 128*128];
-
-                let mut color_index: usize = 0;
-                loop {
-                    if let Some(color) = (&mut colors_iter).next() {
-                        let mut index = color_index;
-                        // Calculate the transpose of a matrix if needed
-                        if let DisplayRotation::Rotate90 = rot {
-                            index = (color_index * drawable_height) % (drawable_size - 1);
-                        }
-
-                        color_buffer[index] = Some(color);
-                        color_index += 1;
-                    } else { break }
-                }
-
-                // Finally, draw values from the buffer
-                for i in 0..color_index {
-                    if let Some(color) = color_buffer[i] {
-                        self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap()
-                    }
-                }
-            },
-        };
         Ok(())
     }
 }
