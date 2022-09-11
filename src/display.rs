@@ -148,7 +148,7 @@ where
                 Command::SetRemap(false, false, true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate90 => {
-                Command::SetRemap(false, true, true).send(&mut self.iface)?;
+                Command::SetRemap(true, true, true).send(&mut self.iface)?;
             }
             DisplayRotation::Rotate180 => {
                 Command::SetRemap(false, true, false).send(&mut self.iface)?;

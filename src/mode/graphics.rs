@@ -160,11 +160,13 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::prelude::{RawData, Size, OriginDimensions, DrawTarget, Dimensions, Pixel};
+use self::embedded_graphics_core::prelude::{RawData, Size, OriginDimensions, DrawTarget, Dimensions, Pixel, PointsIter};
 #[cfg(feature = "graphics")]
 use self::embedded_graphics_core::pixelcolor::Rgb565;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics_core::pixelcolor::raw::RawU16;
+#[cfg(feature = "graphics")]
+use self::embedded_graphics_core::primitives::{Rectangle};
 
 #[cfg(feature = "graphics")]
 impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
@@ -180,6 +182,35 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
             .for_each(|Pixel(pos, color)| {
                 self.set_pixel(pos.x as u32, pos.y as u32, RawU16::from(color).into_inner())
             });
+
+        Ok(())
+    }
+
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Self::Color> {
+        let drawable_area = area.intersection(&self.bounding_box());
+
+        let rot = self.display.get_rotation();
+        let sx = drawable_area.top_left.x as u8;
+        let sy = drawable_area.top_left.y as u8;
+        let ex = (drawable_area.top_left.x as u32 + drawable_area.size.width) as u8;
+        let ey = (drawable_area.top_left.y as u32 + drawable_area.size.height) as u8;
+
+        // Set the draw area to the size of the rectangle
+        let (area_start, area_end) = match rot {
+            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => ((sx, sy), (ex, ey)),
+            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => ((sy, sx), (ey, ex)),
+        };
+
+        self.display.set_draw_area(area_start, area_end).unwrap();
+
+        // Get an iterator of colours as u16
+        // Check points for containment
+        area
+            .points()
+            .zip(colors)
+            .filter(|(pos, _)| drawable_area.contains(*pos))
+            .map(|(_, color)| RawU16::from(color).into_inner())
+            .for_each(|color| self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap());
 
         Ok(())
     }
