@@ -43,7 +43,7 @@ where
         // 1 = data, 0 = command
         self.dc.set_high().map_err(|_| ())?;
 
-        self.spi.write(&buf).map_err(|_| ())?;
+        self.spi.write(buf).map_err(|_| ())?;
 
         Ok(())
     }

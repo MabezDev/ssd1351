@@ -59,7 +59,7 @@ where
         self.set_rotation(DisplayRotation::Rotate0).unwrap();
 
         self.clear()?;
-        
+
         Command::DisplayOn(true).send(&mut self.iface)?;
 
         Ok(())
@@ -68,7 +68,7 @@ where
     /// Clear the display by setting all pixels to black
     pub fn clear(&mut self) -> Result<(), ()> {
         let (display_width, display_height) = self.display_size.dimensions();
-        self.set_draw_area((0,0), (display_width, display_height))?;
+        self.set_draw_area((0, 0), (display_width, display_height))?;
         for _ in 0..(display_height as u32 * display_width as u32) {
             self.iface.send_data(&[0x00, 0x00])?; // send 8 * 2 bits
         }
@@ -80,7 +80,7 @@ where
     /// as (re-)setting the start point of the next `draw` call.
     pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
         Command::Column(start.0, end.0 - 1).send(&mut self.iface)?;
-        Command::Row(start.1.into(), (end.1 - 1).into()).send(&mut self.iface)?;
+        Command::Row(start.1, end.1 - 1).send(&mut self.iface)?;
         Command::WriteRam.send(&mut self.iface)?;
         Ok(())
     }
@@ -89,7 +89,7 @@ where
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
     pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
-        self.iface.send_data(&buffer)?;
+        self.iface.send_data(buffer)?;
         Ok(())
     }
 
@@ -142,7 +142,7 @@ where
     /// Set the display rotation
     pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
         self.display_rotation = display_rotation;
-        
+
         match display_rotation {
             DisplayRotation::Rotate0 => {
                 Command::SetRemap(false, false, true).send(&mut self.iface)?;
