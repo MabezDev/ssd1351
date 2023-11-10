@@ -6,8 +6,8 @@
 // pub mod displaymode;
 pub mod graphics;
 // pub mod terminal;
-pub mod raw;
 pub mod displaymode;
+pub mod raw;
 
 pub use self::graphics::GraphicsMode;
 // pub use self::terminal::TerminalMode;

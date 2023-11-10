@@ -1,4 +1,3 @@
-
 pub mod spi;
 
 pub trait DisplayInterface {

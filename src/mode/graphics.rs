@@ -1,7 +1,7 @@
 use crate::display::Display;
+use crate::interface::DisplayInterface;
 use hal::blocking::delay::DelayMs;
 use hal::digital::v2::OutputPin;
-use crate::interface::DisplayInterface;
 
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayRotation;
@@ -160,20 +160,25 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::prelude::{RawData, Size, OriginDimensions, DrawTarget, Dimensions, Pixel, PointsIter};
+use self::embedded_graphics_core::pixelcolor::raw::RawU16;
 #[cfg(feature = "graphics")]
 use self::embedded_graphics_core::pixelcolor::Rgb565;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::pixelcolor::raw::RawU16;
+use self::embedded_graphics_core::prelude::{
+    Dimensions, DrawTarget, OriginDimensions, Pixel, PointsIter, RawData, Size,
+};
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::primitives::{Rectangle};
+use self::embedded_graphics_core::primitives::Rectangle;
 
 #[cfg(feature = "graphics")]
 impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
     type Color = Rgb565;
     type Error = ();
 
-    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Pixel<Self::Color>> {
+    fn draw_iter<I>(&mut self, pixels: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Pixel<Self::Color>>,
+    {
         let bb = self.bounding_box();
 
         pixels
@@ -186,7 +191,10 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
         Ok(())
     }
 
-    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error> where I: IntoIterator<Item=Self::Color> {
+    fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
+    where
+        I: IntoIterator<Item = Self::Color>,
+    {
         let drawable_area = area.intersection(&self.bounding_box());
 
         let rot = self.display.get_rotation();
@@ -205,18 +213,21 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
 
         // Get an iterator of colours as u16
         // Check points for containment
-        area
-            .points()
+        area.points()
             .zip(colors)
             .filter(|(pos, _)| drawable_area.contains(*pos))
             .map(|(_, color)| RawU16::from(color).into_inner())
-            .for_each(|color| self.display.draw(&[(color >> 8) as u8, color as u8]).unwrap());
+            .for_each(|color| {
+                self.display
+                    .draw(&[(color >> 8) as u8, color as u8])
+                    .unwrap()
+            });
 
         Ok(())
     }
 }
 
-impl<DI: DisplayInterface> OriginDimensions for GraphicsMode<DI>  {
+impl<DI: DisplayInterface> OriginDimensions for GraphicsMode<DI> {
     fn size(&self) -> Size {
         let dim = self.display.get_size().dimensions();
         Size::from((dim.0 as u32, dim.1 as u32))
