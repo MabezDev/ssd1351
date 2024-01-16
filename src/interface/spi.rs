@@ -23,6 +23,11 @@ where
     pub fn new(spi: SPI, dc: DC) -> Self {
         Self { spi, dc }
     }
+
+    /// Release all resources used by the SpiInterface
+    pub fn release(self) -> (SPI, DC) {
+        (self.spi, self.dc)
+    }
 }
 
 impl<SPI, DC> DisplayInterface for SpiInterface<SPI, DC>
