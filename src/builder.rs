@@ -1,7 +1,7 @@
 //! Interface factory
 
 use hal;
-use hal::digital::v2::OutputPin;
+use hal::digital::OutputPin;
 
 use super::display::Display;
 use super::interface::SpiInterface;
@@ -72,7 +72,7 @@ impl Builder {
         dc: DC,
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
-        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        SPI: hal::spi::SpiDevice,
         DC: OutputPin,
     {
         let properties = Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);

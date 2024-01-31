@@ -22,4 +22,4 @@ buffered = []
 
 [dependencies]
 embedded-graphics-core = { version = "0.4", optional = true }
-embedded-hal = { version = "0.2.7", features = ["unproven"] }
+embedded-hal = { version = "1.0.0" }
