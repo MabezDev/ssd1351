@@ -5,14 +5,14 @@
 //! [`GraphicsMode`](../graphics/index.html) and [`TerminalMode`](../terminal/index.html).
 
 use crate::display::Display;
-use crate::interface::DisplayInterface;
+use display_interface::WriteOnlyDataCommand;
 
 use crate::mode::displaymode::DisplayModeTrait;
 
 /// Raw display mode
 pub struct RawMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     pub display: Display<DI>,
     #[cfg(feature = "buffered")]
@@ -21,7 +21,7 @@ where
 
 impl<DI> DisplayModeTrait<DI> for RawMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new RawMode instance
     #[cfg(not(feature = "buffered"))]

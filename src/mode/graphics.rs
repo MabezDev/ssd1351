@@ -1,5 +1,5 @@
 use crate::display::Display;
-use crate::interface::DisplayInterface;
+use display_interface::{DisplayError, WriteOnlyDataCommand};
 use hal::delay::DelayNs;
 use hal::digital::OutputPin;
 
@@ -9,7 +9,7 @@ use crate::properties::DisplayRotation;
 /// Graphics Mode for the display
 pub struct GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     display: Display<DI>,
     #[cfg(feature = "buffered")]
@@ -18,7 +18,7 @@ where
 
 impl<DI> DisplayModeTrait<DI> for GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     #[cfg(not(feature = "buffered"))]
     /// Create new GraphicsMode instance
@@ -53,7 +53,7 @@ where
 
 impl<DI> GraphicsMode<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     #[cfg(not(feature = "buffered"))]
     /// Clear the display
@@ -95,7 +95,7 @@ where
     #[cfg(feature = "buffered")]
     /// Access the framebuffer
     pub fn fb_mut(&mut self) -> &mut [u8] {
-        &mut self.buffer
+        self.buffer
     }
 
     #[cfg(not(feature = "buffered"))]
@@ -136,13 +136,13 @@ where
 
     /// Display is set up in column mode, i.e. a byte walks down a column of 8 pixels from
     /// column 0 on the left, to column _n_ on the right
-    pub fn init(&mut self) -> Result<(), ()> {
+    pub fn init(&mut self) -> Result<(), DisplayError> {
         self.display.init()?;
         Ok(())
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, rot: DisplayRotation) -> Result<(), DisplayError> {
         self.display.set_rotation(rot)
     }
 
@@ -155,18 +155,16 @@ where
 #[cfg(feature = "graphics")]
 extern crate embedded_graphics_core;
 #[cfg(feature = "graphics")]
-use self::embedded_graphics_core::pixelcolor::raw::RawU16;
-#[cfg(feature = "graphics")]
-use self::embedded_graphics_core::pixelcolor::Rgb565;
+use self::embedded_graphics_core::pixelcolor::{raw::RawU16, Rgb565};
 #[cfg(feature = "graphics")]
 use self::embedded_graphics_core::prelude::{
-    Dimensions, DrawTarget, OriginDimensions, Pixel, PointsIter, RawData, Size,
+    Dimensions, DrawTarget, OriginDimensions, Pixel, RawData, Size,
 };
-#[cfg(feature = "graphics")]
-use self::embedded_graphics_core::primitives::Rectangle;
+#[cfg(all(feature = "graphics", not(feature = "buffered")))]
+use self::embedded_graphics_core::{prelude::PointsIter, primitives::Rectangle};
 
 #[cfg(feature = "graphics")]
-impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
+impl<DI: WriteOnlyDataCommand> DrawTarget for GraphicsMode<DI> {
     type Color = Rgb565;
     type Error = ();
 
@@ -223,7 +221,7 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
     }
 }
 
-impl<DI: DisplayInterface> OriginDimensions for GraphicsMode<DI> {
+impl<DI: WriteOnlyDataCommand> OriginDimensions for GraphicsMode<DI> {
     fn size(&self) -> Size {
         let dim = self.display.get_size().dimensions();
         Size::from((dim.0 as u32, dim.1 as u32))
