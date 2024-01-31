@@ -61,7 +61,7 @@ where
         Command::Vcomh(0x05).send(&mut self.iface)?;
         Command::Invert(false).send(&mut self.iface)?;
 
-        self.set_rotation(DisplayRotation::Rotate0).unwrap();
+        self.set_rotation(self.display_rotation).unwrap();
 
         self.clear()?;
 
