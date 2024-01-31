@@ -56,7 +56,7 @@ impl Builder {
         buffer: &'static mut [u8],
     ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
     where
-        SPI: hal::blocking::spi::Transfer<u8> + hal::blocking::spi::Write<u8>,
+        SPI: hal::spi::SpiDevice,
         DC: OutputPin,
     {
         assert_eq!(buffer.len(), 128 * 128 * 2);
