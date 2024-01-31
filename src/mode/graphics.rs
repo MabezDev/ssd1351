@@ -120,14 +120,9 @@ where
     /// Turn a pixel on or off. A non-zero `value` is treated as on, `0` as off. If the X and Y
     /// coordinates are out of the bounds of the display, this method call is a noop.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: u16) {
-        let rot = self.display.get_rotation();
-        let (nx, ny) = match rot {
-            DisplayRotation::Rotate0 | DisplayRotation::Rotate180 => (x, y),
-            DisplayRotation::Rotate90 | DisplayRotation::Rotate270 => (y, x),
-        };
         // set bytes in buffer
-        self.buffer[(ny as usize * 128usize + nx as usize) * 2] = (color >> 8) as u8;
-        self.buffer[((ny as usize * 128usize + nx as usize) * 2) + 1usize] = color as u8;
+        self.buffer[(y as usize * 128usize + x as usize) * 2] = (color >> 8) as u8;
+        self.buffer[((y as usize * 128usize + x as usize) * 2) + 1usize] = color as u8;
     }
 
     #[cfg(feature = "buffered")]
