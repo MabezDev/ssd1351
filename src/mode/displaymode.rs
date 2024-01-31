@@ -1,7 +1,7 @@
 //! Abstraction of different operating modes for the SSD1351
 
 use crate::display::Display;
-use crate::interface::DisplayInterface;
+use display_interface::WriteOnlyDataCommand;
 
 /// Display abstraction
 pub struct DisplayMode<MODE> {
@@ -30,7 +30,7 @@ impl<MODE> DisplayMode<MODE> {
     #[cfg(not(feature = "buffered"))]
     pub fn new<DI>(display: Display<DI>) -> Self
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         DisplayMode {
@@ -41,7 +41,7 @@ impl<MODE> DisplayMode<MODE> {
     #[cfg(feature = "buffered")]
     pub fn new<DI>(display: Display<DI>, buffer: &'static mut [u8]) -> Self
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         DisplayMode {
@@ -54,7 +54,7 @@ impl<MODE> DisplayMode<MODE> {
     #[cfg(not(feature = "buffered"))]
     pub fn into<DI, NMODE: DisplayModeTrait<DI>>(self) -> NMODE
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         let display = self.display.release();
@@ -64,7 +64,7 @@ impl<MODE> DisplayMode<MODE> {
     #[cfg(feature = "buffered")]
     pub fn into<DI, NMODE: DisplayModeTrait<DI>>(self) -> NMODE
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand,
         MODE: DisplayModeTrait<DI>,
     {
         let (display, buffer) = self.display.release();

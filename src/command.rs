@@ -1,4 +1,4 @@
-use super::interface::DisplayInterface;
+use display_interface::{DataFormat, DisplayError, WriteOnlyDataCommand};
 
 const REMAP_BASE: u8 = 0b00100100;
 
@@ -46,9 +46,9 @@ pub enum Command {
 
 impl Command {
     /// Send command to SSD1351
-    pub fn send<DI>(self, iface: &mut DI) -> Result<(), ()>
+    pub fn send<DI>(self, iface: &mut DI) -> Result<(), DisplayError>
     where
-        DI: DisplayInterface,
+        DI: WriteOnlyDataCommand,
     {
         // Transform command into a fixed size array of 7 u8 and the real length for sending
         // TODO can we replace the use if the static buffers?
@@ -86,10 +86,10 @@ impl Command {
         };
 
         // Send command over the interface
-        iface.send_command(command)?;
+        iface.send_commands(DataFormat::U8(&[command]))?;
 
         if len > 0 {
-            iface.send_data(&data[0..len])?;
+            iface.send_data(DataFormat::U8(&data[0..len]))?;
         }
 
         Ok(())

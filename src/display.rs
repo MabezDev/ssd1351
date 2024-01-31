@@ -5,7 +5,9 @@ use crate::command::Command;
 use crate::properties::DisplayRotation;
 use crate::properties::DisplaySize;
 
-use crate::interface::DisplayInterface;
+use display_interface::DataFormat;
+use display_interface::DisplayError;
+use display_interface::WriteOnlyDataCommand;
 
 /// Display properties struct
 pub struct Display<DI> {
@@ -16,7 +18,7 @@ pub struct Display<DI> {
 
 impl<DI> Display<DI>
 where
-    DI: DisplayInterface,
+    DI: WriteOnlyDataCommand,
 {
     /// Create new Display instance
     pub fn new(
@@ -38,7 +40,7 @@ where
 
     /// Initialise the display in column mode (i.e. a byte walks down a column of 8 pixels) with
     /// column 0 on the left and column _(display_width - 1)_ on the right.
-    pub fn init(&mut self) -> Result<(), ()> {
+    pub fn init(&mut self) -> Result<(), DisplayError> {
         let (_, display_height) = self.display_size.dimensions();
 
         // TODO: Break up into nice bits so display modes can pick whathever they need
@@ -71,11 +73,11 @@ where
     }
 
     /// Clear the display by setting all pixels to black
-    pub fn clear(&mut self) -> Result<(), ()> {
+    pub fn clear(&mut self) -> Result<(), DisplayError> {
         let (display_width, display_height) = self.display_size.dimensions();
         self.set_draw_area((0, 0), (display_width, display_height))?;
         for _ in 0..(display_height as u32 * display_width as u32) {
-            self.iface.send_data(&[0x00, 0x00])?; // send 8 * 2 bits
+            self.iface.send_data(DataFormat::U8(&[0x00, 0x00]))?; // send 8 * 2 bits
         }
         Ok(())
     }
@@ -83,7 +85,7 @@ where
     /// Set the position in the framebuffer of the display where any sent data should be
     /// drawn. This method can be used for changing the affected area on the screen as well
     /// as (re-)setting the start point of the next `draw` call.
-    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), ()> {
+    pub fn set_draw_area(&mut self, start: (u8, u8), end: (u8, u8)) -> Result<(), DisplayError> {
         Command::Column(start.0, end.0 - 1).send(&mut self.iface)?;
         Command::Row(start.1, end.1 - 1).send(&mut self.iface)?;
         Command::WriteRam.send(&mut self.iface)?;
@@ -93,8 +95,8 @@ where
     /// Send the data to the display for drawing at the current position in the framebuffer
     /// and advance the position accordingly. Cf. `set_draw_area` to modify the affected area by
     /// this method.
-    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), ()> {
-        self.iface.send_data(buffer)?;
+    pub fn draw(&mut self, buffer: &[u8]) -> Result<(), DisplayError> {
+        self.iface.send_data(DataFormat::U8(buffer))?;
         Ok(())
     }
 
@@ -145,7 +147,7 @@ where
     }
 
     /// Set the display rotation
-    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), ()> {
+    pub fn set_rotation(&mut self, display_rotation: DisplayRotation) -> Result<(), DisplayError> {
         self.display_rotation = display_rotation;
 
         match display_rotation {

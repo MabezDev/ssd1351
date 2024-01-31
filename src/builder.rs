@@ -1,14 +1,12 @@
 //! Interface factory
 
-use hal;
-use hal::digital::OutputPin;
-
 use super::display::Display;
-use super::interface::SpiInterface;
 use super::mode::displaymode::DisplayMode;
 use super::mode::raw::RawMode;
 use super::properties::DisplayRotation;
 use super::properties::DisplaySize;
+
+use display_interface::WriteOnlyDataCommand;
 
 /// Builder struct. Driver options and interface are set using its methods.
 #[derive(Clone)]
@@ -48,34 +46,27 @@ impl Builder {
     }
 
     #[cfg(feature = "buffered")]
-    /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
+    /// Finish the builder and use the given interface to communicate with the display
+    pub fn connect_interface<DI>(
         &self,
-        spi: SPI,
-        dc: DC,
+        display_interface: DI,
         buffer: &'static mut [u8],
-    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    ) -> DisplayMode<RawMode<DI>>
     where
-        SPI: hal::spi::SpiDevice,
-        DC: OutputPin,
+        DI: WriteOnlyDataCommand,
     {
         assert_eq!(buffer.len(), 128 * 128 * 2);
-        let properties = Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
-        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties, buffer)
+        let properties = Display::new(display_interface, self.display_size, self.rotation);
+        DisplayMode::<RawMode<DI>>::new(properties, buffer)
     }
 
     #[cfg(not(feature = "buffered"))]
-    /// Finish the builder and use SPI to communicate with the display
-    pub fn connect_spi<SPI, DC>(
-        &self,
-        spi: SPI,
-        dc: DC,
-    ) -> DisplayMode<RawMode<SpiInterface<SPI, DC>>>
+    /// Finish the builder and use the given interface to communicate with the display
+    pub fn connect_interface<DI>(&self, display_interface: DI) -> DisplayMode<RawMode<DI>>
     where
-        SPI: hal::spi::SpiDevice,
-        DC: OutputPin,
+        DI: WriteOnlyDataCommand,
     {
-        let properties = Display::new(SpiInterface::new(spi, dc), self.display_size, self.rotation);
-        DisplayMode::<RawMode<SpiInterface<SPI, DC>>>::new(properties)
+        let properties = Display::new(display_interface, self.display_size, self.rotation);
+        DisplayMode::<RawMode<DI>>::new(properties)
     }
 }
