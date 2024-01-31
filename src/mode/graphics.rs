@@ -191,6 +191,7 @@ impl<DI: DisplayInterface> DrawTarget for GraphicsMode<DI> {
         Ok(())
     }
 
+    #[cfg(not(feature = "buffered"))]
     fn fill_contiguous<I>(&mut self, area: &Rectangle, colors: I) -> Result<(), Self::Error>
     where
         I: IntoIterator<Item = Self::Color>,
