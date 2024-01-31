@@ -1,7 +1,7 @@
 use crate::display::Display;
 use crate::interface::DisplayInterface;
-use hal::blocking::delay::DelayMs;
-use hal::digital::v2::OutputPin;
+use hal::delay::DelayNs;
+use hal::digital::OutputPin;
 
 use crate::mode::displaymode::DisplayModeTrait;
 use crate::properties::DisplayRotation;
@@ -76,7 +76,7 @@ where
     pub fn reset<RST, DELAY>(&mut self, rst: &mut RST, delay: &mut DELAY) -> Result<(), RST::Error>
     where
         RST: OutputPin,
-        DELAY: DelayMs<u8>,
+        DELAY: DelayNs,
     {
         rst.set_high()?;
         delay.delay_ms(1);

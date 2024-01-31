@@ -1,7 +1,7 @@
 //! SSD1351 SPI interface
 
 use hal;
-use hal::digital::v2::OutputPin;
+use hal::digital::OutputPin;
 
 use super::DisplayInterface;
 
@@ -16,7 +16,7 @@ pub struct SpiInterface<SPI, DC> {
 
 impl<SPI, DC> SpiInterface<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
+    SPI: hal::spi::SpiDevice,
     DC: OutputPin,
 {
     /// Create new SPI interface for communciation with SSD1351
@@ -27,7 +27,7 @@ where
 
 impl<SPI, DC> DisplayInterface for SpiInterface<SPI, DC>
 where
-    SPI: hal::blocking::spi::Write<u8>,
+    SPI: hal::spi::SpiDevice,
     DC: OutputPin,
 {
     fn send_command(&mut self, cmd: u8) -> Result<(), ()> {
