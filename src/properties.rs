@@ -34,4 +34,10 @@ impl DisplaySize {
             DisplaySize::Display128x96 => (128, 96),
         }
     }
+
+    /// Get total number of pixels
+    pub(crate) fn num_pixels(&self) -> usize {
+        let (w, h) = self.dimensions();
+        w as usize * h as usize
+    }
 }
