@@ -55,7 +55,7 @@ impl Builder {
     where
         DI: WriteOnlyDataCommand,
     {
-        assert_eq!(buffer.len(), 128 * 128 * 2);
+        assert_eq!(buffer.len(), self.display_size.num_pixels() * 2);
         let properties = Display::new(display_interface, self.display_size, self.rotation);
         DisplayMode::<RawMode<DI>>::new(properties, buffer)
     }
